@@ -20,13 +20,13 @@ api = FastAPI(title=settings.app_name)
 
 api.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.client_origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-sio.eio.cors_allowed_origins = settings.client_origins
+sio.eio.cors_allowed_origins = ["*"]
 
 api.include_router(auth_router)
 api.include_router(clients_router)
