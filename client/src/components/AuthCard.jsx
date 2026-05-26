@@ -19,6 +19,7 @@ export default function AuthCard({ onLogin }) {
       const email = normalizeLoginToEmail(loginId);
       const credentials = await signInWithEmailAndPassword(auth, email, password);
       const token = await credentials.user.getIdToken();
+      localStorage.setItem("authToken", token);
       await onLogin(token);
     } catch (err) {
       setError(err.message);

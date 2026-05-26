@@ -28,7 +28,15 @@ export default function App() {
   const [editingLog, setEditingLog] = useState(null);
   const socketRef = useRef(null);
 
+  // Restore auth token from localStorage on app load
   useEffect(() => {
+    const savedToken = localStorage.getItem("authToken");
+    if (savedToken) {
+      loadSessionData(savedToken);
+    }
+  }, []);
+
+  useEffect(() {
     if (!token) return undefined;
 
     const socket = createChatSocket(token);
@@ -150,6 +158,7 @@ export default function App() {
 
   async function handleLogout() {
     await signOut(auth);
+    localStorage.removeItem("authToken");
     setToken("");
     setUser(null);
     setLogs([]);
