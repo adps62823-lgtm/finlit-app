@@ -36,7 +36,7 @@ export default function App() {
     }
   }, []);
 
-  useEffect(() {
+  useEffect(() => {
     if (!token) return undefined;
 
     const socket = createChatSocket(token);
