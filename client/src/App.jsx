@@ -5,6 +5,7 @@ import AuthCard from "./components/AuthCard";
 import AppShell from "./components/AppShell";
 import GlobalChatWidget from "./components/GlobalChatWidget";
 import LogEditModal from "./components/LogEditModal";
+import Splash from "./components/Splash";
 import { auth } from "./firebase";
 import { apiRequest } from "./services/api";
 import { createChatSocket } from "./services/chat";
@@ -20,20 +21,44 @@ import { isOverdue } from "./utils/format";
 export default function App() {
   const [token, setToken] = useState("");
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [logs, setLogs] = useState([]);
   const [messages, setMessages] = useState([]);
   const [clients, setClients] = useState([]);
   const [tasks, setTasks] = useState([]);
   const [filters, setFilters] = useState({ query: "", staff: "" });
   const [editingLog, setEditingLog] = useState(null);
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem("theme") || "dark";
+  });
   const socketRef = useRef(null);
+
+  // Apply theme to document
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("theme", theme);
+  }, [theme]);
+
+  // Toggle theme between light and dark
+  function toggleTheme() {
+    setTheme((current) => (current === "dark" ? "light" : "dark"));
+  }
 
   // Restore auth token from localStorage on app load
   useEffect(() => {
-    const savedToken = localStorage.getItem("authToken");
-    if (savedToken) {
-      loadSessionData(savedToken);
-    }
+    const init = async () => {
+      const savedToken = localStorage.getItem("authToken");
+      if (savedToken) {
+        try {
+          await loadSessionData(savedToken);
+        } catch (err) {
+          console.error("Failed to restore session", err);
+        }
+      }
+      setLoading(false);
+    };
+
+    init();
   }, []);
 
   useEffect(() => {
@@ -215,13 +240,17 @@ export default function App() {
     setFilters((current) => ({ ...current, [key]: value }));
   }
 
+  if (loading) {
+    return <Splash />;
+  }
+
   if (!user) {
-    return <AuthCard onLogin={loadSessionData} />;
+    return <AuthCard onLogin={async (token) => { setLoading(true); await loadSessionData(token); setLoading(false); }} />;
   }
 
   return (
     <BrowserRouter>
-      <AppShell onLogout={handleLogout} stats={stats} user={user}>
+      <AppShell onLogout={handleLogout} onToggleTheme={toggleTheme} stats={stats} theme={theme} user={user}>
         <Routes>
           <Route element={<Navigate replace to="/app/command" />} path="/" />
           <Route

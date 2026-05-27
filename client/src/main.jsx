@@ -44,3 +44,14 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     </RootErrorBoundary>
   </StrictMode>
 );
+
+// Remove the static initial splash (if present) after React has mounted
+function removeInitialSplash() {
+  const el = document.getElementById("initial-splash");
+  if (!el) return;
+  el.classList.add("fade-out");
+  setTimeout(() => el.remove(), 400);
+}
+
+// Allow the first paint to occur then remove splash
+requestAnimationFrame(() => requestAnimationFrame(removeInitialSplash));

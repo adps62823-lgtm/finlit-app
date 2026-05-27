@@ -31,9 +31,7 @@ export default function AuthCard({ onLogin }) {
   return (
     <main className="auth-layout auth-layout-simple">
       <section className="auth-panel auth-panel-simple">
-        <div className="auth-logo-mark">
-          <ShieldCheck size={24} />
-        </div>
+          <img src="/logo.png" alt="Finlit" width={50} height={50} className="auth-logo" />
         <div className="auth-heading">
           <div className="eyebrow">Finlit</div>
           <h2>Sign in</h2>

@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Home, LogOut, Menu, Radar, ShieldCheck, Users, X } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Home, LogOut, Menu, Radar, ShieldCheck, Users, X, Moon, Sun } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 
 const navItems = [
@@ -38,28 +38,48 @@ const pageTitles = {
   "/app/research": "Tools",
 };
 
-export default function AppShell({ user, stats, onLogout, children }) {
+export default function AppShell({ user, stats, onLogout, onToggleTheme, theme, children }) {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [personalOpen, setPersonalOpen] = useState(false);
+  const [displayName, setDisplayName] = useState("");
+  const [avatarColor, setAvatarColor] = useState("#2fc4b2");
   const title = location.pathname.startsWith("/app/clients/")
     ? "Client"
     : pageTitles[location.pathname] || "Finlit";
+
+  useEffect(() => {
+    const saved = localStorage.getItem("finlit_displayName");
+    const color = localStorage.getItem("finlit_avatarColor");
+    if (saved) setDisplayName(saved);
+    if (color) setAvatarColor(color);
+  }, []);
+
+  useEffect(() => {
+    if (displayName) localStorage.setItem("finlit_displayName", displayName);
+  }, [displayName]);
+
+  useEffect(() => {
+    if (avatarColor) localStorage.setItem("finlit_avatarColor", avatarColor);
+  }, [avatarColor]);
 
   return (
     <div className="app-shell">
       <aside className="app-sidebar">
         <div className="app-brand-block">
-          <div className="brand-emblem">F</div>
+          <div className="brand-emblem" style={{background: `linear-gradient(135deg, ${avatarColor}, ${avatarColor}66)`}}>
+            { (displayName || user.name).slice(0,1).toUpperCase() }
+          </div>
           <div>
             <div className="brand-title">Finlit</div>
-            <div className="brand-caption">@{user.name.toLowerCase().replace(/\s+/g, "")}</div>
+            <div className="brand-caption">@{(displayName || user.name).toLowerCase().replace(/\s+/g, "")}</div>
           </div>
         </div>
 
         <section className="sidebar-panel sidebar-user-panel">
-          <div className="sidebar-user-avatar">{user.name.slice(0, 1).toUpperCase()}</div>
+          <div className="sidebar-user-avatar" style={{background: `${avatarColor}22`}}>{(displayName || user.name).slice(0, 1).toUpperCase()}</div>
           <div>
-            <div className="sidebar-user-name">{user.name}</div>
+            <div className="sidebar-user-name">{displayName || user.name}</div>
             <div className="sidebar-user-role">{user.role === "owner" ? "Owner" : "Staff"}</div>
           </div>
         </section>
@@ -80,6 +100,10 @@ export default function AppShell({ user, stats, onLogout, children }) {
               </NavLink>
             );
           })}
+          <button className="sidebar-link" onClick={onToggleTheme} title={`Switch to ${theme === "dark" ? "light" : "dark"} theme`} type="button">
+            <div className="sidebar-link-icon">{theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}</div>
+            <div className="sidebar-link-title">{theme === "dark" ? "Light" : "Dark"}</div>
+          </button>
         </nav>
 
         <section className="sidebar-panel">
@@ -126,11 +150,39 @@ export default function AppShell({ user, stats, onLogout, children }) {
             <h1>{title}</h1>
           </div>
           <div className="topbar-actions">
-            <div className="topbar-chip">{new Date().toLocaleDateString("en-IN", { dateStyle: "long" })}</div>
-            <button className="ghost-button" onClick={onLogout} type="button">
-              <LogOut size={16} />
-              <span>Logout</span>
-            </button>
+              <div className="topbar-chip">{new Date().toLocaleDateString("en-IN", { dateStyle: "long" })}</div>
+              <button
+                className="icon-button"
+                onClick={() => setPersonalOpen((s) => !s)}
+                title="Personalize"
+                type="button"
+              >
+                <Users size={18} />
+              </button>
+              <button
+                className="icon-button"
+                onClick={onToggleTheme}
+                title={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
+                type="button"
+              >
+                {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+              </button>
+              <button className="ghost-button" onClick={onLogout} type="button">
+                <LogOut size={16} />
+                <span>Logout</span>
+              </button>
+
+              {personalOpen ? (
+                <div className="card" style={{position:'absolute', right:20, top:64, width:260, zIndex: 999}}>
+                  <label style={{display:'block', marginBottom:8, fontWeight:700}}>Display name</label>
+                  <input value={displayName} onChange={(e)=>setDisplayName(e.target.value)} placeholder={user.name} style={{width:'100%', padding:8, borderRadius:8, border:'1px solid var(--border)'}} />
+                  <label style={{display:'block', marginTop:12, marginBottom:8, fontWeight:700}}>Avatar color</label>
+                  <input type="color" value={avatarColor} onChange={(e)=>setAvatarColor(e.target.value)} style={{width:'100%', height:36, padding:4, borderRadius:8, border:'1px solid var(--border)'}} />
+                  <div style={{display:'flex', justifyContent:'flex-end', marginTop:12}}>
+                    <button className="ghost-button" onClick={()=>setPersonalOpen(false)} type="button">Close</button>
+                  </div>
+                </div>
+              ) : null}
           </div>
         </header>
 
