@@ -127,7 +127,7 @@ export default function ClientDetailPage({
           <div className="timeline-list">
             {clientLogs.map((log) => (
               <article className="timeline-row timeline-row-stacked" key={log._id}>
-                <div className="timeline-copy">
+                <div className="timeline-copy" style={{ whiteSpace: "pre-wrap", wordWrap: "break-word", overflowWrap: "break-word", maxWidth: "100%" }}>
                   <strong>{log.meetingType || "review"}</strong>
                   <p>{log.notes}</p>
                   <div className="timeline-meta-line">
