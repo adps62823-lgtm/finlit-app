@@ -10,7 +10,7 @@ export default function Splash({ message = "Loading…" }) {
         rootRef.current.style.opacity = "0";
         rootRef.current.style.pointerEvents = "none";
       }
-    }, 8000);
+    }, 2000);
     return () => clearTimeout(timer);
   }, []);
 
