@@ -5,22 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <title>Finlit Command</title>
-    <style>
-      /* Minimal inline styles for the initial static splash (before React/CSS load) */
-      .initial-splash{position:fixed;inset:0;display:grid;place-items:center;background:#07111f;color:#f4f7fb;z-index:9999}
-      .initial-splash .logo{font-family:sans-serif;font-weight:700;font-size:20px;letter-spacing:0.02em}
-      .initial-splash .spinner{margin-top:12px;width:36px;height:36px;border-radius:50%;border:4px solid rgba(255,255,255,0.08);border-top-color:#54e1cf;animation:spin 1s linear infinite}
-      @keyframes spin{to{transform:rotate(360deg)}}
-      .initial-splash.fade-out{opacity:0;transition:opacity .36s ease}
-    </style>
   </head>
   <body>
-    <div id="initial-splash" class="initial-splash">
-      <div style="text-align:center">
-        <div class="logo">Finlit Command</div>
-        <div class="spinner" aria-hidden="true"></div>
-      </div>
-    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

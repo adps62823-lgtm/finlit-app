@@ -5,7 +5,7 @@ export default function MetricCard({ label, value, note, accent = "teal" }) {
     <article className={`metric-card tone-${accent}`}>
       <span>{label}</span>
       <strong>{value}</strong>
-      <p>{note}</p>
+      {note && <p>{note}</p>}
     </article>
   );
 }

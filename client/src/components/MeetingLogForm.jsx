@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-const initialState = {
+const INIT = {
   clientName: "",
   location: "",
   meetingType: "review",
@@ -12,22 +12,17 @@ const initialState = {
 };
 
 export default function MeetingLogForm({ onCreate }) {
-  const [form, setForm] = useState(initialState);
+  const [form, setForm] = useState(INIT);
   const [busy, setBusy] = useState(false);
 
-  function updateField(key, value) {
-    setForm((current) => ({ ...current, [key]: value }));
-  }
+  const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
 
-  async function handleSubmit(event) {
-    event.preventDefault();
+  async function handleSubmit(e) {
+    e.preventDefault();
     setBusy(true);
     try {
-      await onCreate({
-        ...form,
-        followUpDate: form.followUpDate || undefined,
-      });
-      setForm(initialState);
+      await onCreate({ ...form, followUpDate: form.followUpDate || undefined });
+      setForm(INIT);
     } finally {
       setBusy(false);
     }
@@ -35,93 +30,72 @@ export default function MeetingLogForm({ onCreate }) {
 
   return (
     <section className="surface-card accent-card sticky-panel">
-      <div className="panel-kicker">New meeting</div>
-      <h3>Add log</h3>
+      <div className="panel-kicker">New entry</div>
+      <h3 style={{ fontSize: 17, fontWeight: 700, color: "var(--text)", marginBottom: "var(--s4)" }}>
+        Log a meeting
+      </h3>
 
       <form className="meeting-form" onSubmit={handleSubmit}>
-        <label className="field">
+        <div className="field">
           <span>Client name</span>
-          <input
-            value={form.clientName}
-            onChange={(event) => updateField("clientName", event.target.value)}
-            placeholder="Rakesh Sharma"
-            required
-          />
-        </label>
+          <input value={form.clientName} onChange={set("clientName")} placeholder="Rakesh Sharma" required />
+        </div>
 
-        <label className="field">
-          <span>Meeting location</span>
-          <input
-            value={form.location}
-            onChange={(event) => updateField("location", event.target.value)}
-            placeholder="Mahmoorganj office"
-            required
-          />
-        </label>
+        <div className="field">
+          <span>Location</span>
+          <input value={form.location} onChange={set("location")} placeholder="Mahmoorganj office" required />
+        </div>
 
         <div className="form-split-grid">
-          <label className="field">
+          <div className="field">
             <span>Meeting type</span>
-            <select onChange={(event) => updateField("meetingType", event.target.value)} value={form.meetingType}>
+            <select value={form.meetingType} onChange={set("meetingType")}>
               <option value="review">Review</option>
               <option value="prospect">Prospect</option>
               <option value="service">Service</option>
               <option value="collection">Collection</option>
             </select>
-          </label>
-
-          <label className="field">
+          </div>
+          <div className="field">
             <span>Priority</span>
-            <select onChange={(event) => updateField("priority", event.target.value)} value={form.priority}>
+            <select value={form.priority} onChange={set("priority")}>
               <option value="low">Low</option>
               <option value="medium">Medium</option>
               <option value="high">High</option>
             </select>
-          </label>
+          </div>
         </div>
 
-        <label className="field field-wide">
-          <span>Advisory notes</span>
+        <div className="field field-wide">
+          <span>Notes</span>
           <textarea
             value={form.notes}
-            onChange={(event) => updateField("notes", event.target.value)}
-            placeholder="Capture goals, objections, portfolio questions, promised actions, servicing issues, and next steps."
-            rows="7"
+            onChange={set("notes")}
+            placeholder="Goals, objections, promised actions, next steps…"
+            rows={5}
             required
           />
-        </label>
+        </div>
 
-        <label className="field">
+        <div className="field">
           <span>Outcome</span>
-          <input
-            value={form.outcome}
-            onChange={(event) => updateField("outcome", event.target.value)}
-            placeholder="Interested in SIP top-up after family discussion"
-          />
-        </label>
+          <input value={form.outcome} onChange={set("outcome")} placeholder="Interested in SIP top-up" />
+        </div>
 
-        <label className="field">
-          <span>Follow-up summary</span>
-          <input
-            value={form.followUpSummary}
-            onChange={(event) => updateField("followUpSummary", event.target.value)}
-            placeholder="Call back with comparison and documents list"
-          />
-        </label>
+        <div className="field">
+          <span>Follow-up note</span>
+          <input value={form.followUpSummary} onChange={set("followUpSummary")} placeholder="Call back with documents" />
+        </div>
 
-        <label className="field">
+        <div className="field">
           <span>Follow-up date</span>
-          <input
-            value={form.followUpDate}
-            onChange={(event) => updateField("followUpDate", event.target.value)}
-            type="date"
-          />
-        </label>
+          <input type="date" value={form.followUpDate} onChange={set("followUpDate")} />
+        </div>
 
-        <div className="form-actions">
-          <div className="form-note">Keep it short and useful.</div>
+        <div className="form-actions" style={{ marginTop: "var(--s2)" }}>
+          <span className="form-note">Ctrl+Enter to submit</span>
           <button disabled={busy} type="submit">
-            {busy ? "Saving entry..." : "Create meeting log"}
+            {busy ? "Saving…" : "Create log →"}
           </button>
         </div>
       </form>
