@@ -50,7 +50,7 @@ function removeInitialSplash() {
   const el = document.getElementById("initial-splash");
   if (!el) return;
   el.classList.add("fade-out");
-  setTimeout(() => el.remove(), 400);
+  setTimeout(() => el.remove(), 100);
 }
 
 // Allow the first paint to occur then remove splash
