@@ -9,3 +9,4 @@ build/
 *.log
 .vscode/settings.json
 .idea/
+ssh-keys/
