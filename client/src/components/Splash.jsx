@@ -3,19 +3,26 @@ import React, { useEffect, useRef } from "react";
 export default function Splash({ message = "Loading…" }) {
   const rootRef = useRef(null);
 
-  // Safety valve: if something goes wrong, remove splash after 8s
   useEffect(() => {
+    // Safety valve only — if the app genuinely hangs for 6s, fade the splash
+    // so users aren't permanently stuck. Normal loads dismiss via unmount.
     const timer = setTimeout(() => {
       if (rootRef.current) {
         rootRef.current.style.opacity = "0";
         rootRef.current.style.pointerEvents = "none";
       }
-    }, 2000);
+    }, 6000);
     return () => clearTimeout(timer);
   }, []);
 
   return (
-    <div className="splash-root" ref={rootRef} role="status" aria-live="polite" aria-label="Loading application">
+    <div
+      className="splash-root"
+      ref={rootRef}
+      role="status"
+      aria-live="polite"
+      aria-label="Loading application"
+    >
       <div className="splash-card">
         <div className="splash-wordmark">
           Fin<span>lit</span>

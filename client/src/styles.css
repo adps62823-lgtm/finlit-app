@@ -44,8 +44,7 @@
   --text:        #e8eaf2;
   --text-2:      #8b90a4;
   --text-3:      #555b72;
-  --brand-main:  #3db361;
-  --accent:      #3db361;
+  --accent:      #4f6ef7;
   --accent-2:    #7c9df4;
   --accent-glow: rgba(79,110,247,0.18);
   --green:       #34d399;
@@ -372,7 +371,7 @@ select option { background: var(--surface); color: var(--text); }
   color: var(--text);
 }
 
-.splash-wordmark span { color: var(--brand-main); }
+.splash-wordmark span { color: var(--accent); }
 
 .splash-bar {
   width: 120px;
@@ -385,7 +384,7 @@ select option { background: var(--surface); color: var(--text); }
 .splash-bar-fill {
   height: 100%;
   width: 40%;
-  background: var(--brand-main);
+  background: var(--accent);
   border-radius: 99px;
   animation: splash-progress 1.4s var(--ease) infinite;
 }
@@ -400,7 +399,7 @@ select option { background: var(--surface); color: var(--text); }
 .splash-spinner {
   width: 20px; height: 20px;
   border: 2px solid var(--border-2);
-  border-top-color: var(--brand-main);
+  border-top-color: var(--accent);
   border-radius: 50%;
   animation: spin 700ms linear infinite;
 }
@@ -754,7 +753,7 @@ select option { background: var(--surface); color: var(--text); }
 .metric-card p { font-size: 12px; color: var(--text-3); }
 
 .tone-teal  { border-top: 2px solid var(--green); }
-.tone-slate { border-top: 2px solid #4f6ef7; }
+.tone-slate { border-top: 2px solid var(--accent); }
 .tone-amber { border-top: 2px solid var(--amber); }
 .tone-rose  { border-top: 2px solid var(--red); }
 
@@ -1468,4 +1467,72 @@ select option { background: var(--surface); color: var(--text); }
   .hero-panel-metrics { grid-template-columns: 1fr 1fr; }
   .client-summary-grid { grid-template-columns: 1fr 1fr; }
   .surface-card { padding: var(--s4); }
+}
+
+/* ─── Meetings page — collapsible form on mobile ────────────── */
+
+/* Header row inside the hero card */
+.meetings-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s3);
+}
+
+/* The "New log" toggle button — hidden on desktop (form is always shown) */
+.meetings-fab-trigger {
+  display: none;
+  align-items: center;
+  gap: var(--s2);
+  padding: 0 var(--s4);
+  height: 36px;
+  border-radius: var(--r2);
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background var(--dur-fast), border-color var(--dur-fast);
+}
+
+.meetings-fab-trigger:hover {
+  background: var(--accent-2);
+  border-color: var(--accent-2);
+  transform: none;
+  box-shadow: none;
+}
+
+/* ── On tablet and below (≤1100px) the grid goes single-column  */
+/* The form column is hidden by default; shown when toggled       */
+@media (max-width: 1100px) {
+  .meetings-fab-trigger {
+    display: inline-flex;
+  }
+
+  .meetings-form-col {
+    display: none;
+  }
+
+  .meetings-form-col--open {
+    display: block;
+  }
+
+  /* Remove sticky positioning when stacked — no benefit on mobile */
+  .meetings-form-col--open .sticky-panel {
+    position: static;
+  }
+}
+
+/* ── On desktop (>1100px) always show the form, hide the button  */
+@media (min-width: 1101px) {
+  .meetings-fab-trigger {
+    display: none !important;
+  }
+
+  .meetings-form-col {
+    display: block !important;
+  }
 }

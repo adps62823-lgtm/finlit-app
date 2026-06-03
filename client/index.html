@@ -5,6 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <title>Finlit Command</title>
+
+    <!--
+      Preconnect tells the browser to open the TCP+TLS handshake to Google Fonts
+      before it even parses the CSS. Saves ~150-300ms on first load.
+    -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!--
+      Load fonts with display=swap so text renders immediately in the fallback
+      font and swaps to DM Sans once downloaded — no blank text during load.
+      The @import in styles.css is REMOVED and replaced by this <link>.
+    -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap"
+    />
   </head>
   <body>
     <div id="root"></div>
