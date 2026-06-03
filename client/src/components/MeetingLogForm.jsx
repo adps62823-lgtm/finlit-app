@@ -14,26 +14,28 @@ const INIT = {
 export default function MeetingLogForm({ onCreate }) {
   const [form, setForm] = useState(INIT);
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
 
-  const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
+  const set = (key) => (event) => setForm((current) => ({ ...current, [key]: event.target.value }));
 
-  async function handleSubmit(e) {
-    e.preventDefault();
+  async function handleSubmit(event) {
+    event.preventDefault();
     setBusy(true);
+    setError("");
     try {
       await onCreate({ ...form, followUpDate: form.followUpDate || undefined });
       setForm(INIT);
+    } catch (err) {
+      setError(err.message || "Unable to create the meeting log.");
     } finally {
       setBusy(false);
     }
   }
 
   return (
-    <section className="surface-card accent-card sticky-panel">
-      <div className="panel-kicker">New entry</div>
-      <h3 style={{ fontSize: 17, fontWeight: 700, color: "var(--text)", marginBottom: "var(--s4)" }}>
-        Log a meeting
-      </h3>
+    <section className="workspace-card accent-card sticky-panel">
+      <div className="section-kicker">New entry</div>
+      <h3>Log a meeting</h3>
 
       <form className="meeting-form" onSubmit={handleSubmit}>
         <div className="field">
@@ -71,7 +73,7 @@ export default function MeetingLogForm({ onCreate }) {
           <textarea
             value={form.notes}
             onChange={set("notes")}
-            placeholder="Goals, objections, promised actions, next steps…"
+            placeholder="Goals, objections, promised actions, next steps..."
             rows={5}
             required
           />
@@ -92,10 +94,12 @@ export default function MeetingLogForm({ onCreate }) {
           <input type="date" value={form.followUpDate} onChange={set("followUpDate")} />
         </div>
 
-        <div className="form-actions" style={{ marginTop: "var(--s2)" }}>
-          <span className="form-note">Ctrl+Enter to submit</span>
+        {error ? <div className="inline-error">{error}</div> : null}
+
+        <div className="form-actions">
+          <span className="form-note">Ctrl + Enter to submit</span>
           <button disabled={busy} type="submit">
-            {busy ? "Saving…" : "Create log →"}
+            {busy ? "Saving..." : "Create log ->"}
           </button>
         </div>
       </form>

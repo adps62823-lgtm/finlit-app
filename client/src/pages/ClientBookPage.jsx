@@ -1,8 +1,9 @@
 import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { Plus } from "lucide-react";
 import { formatDateOnly } from "../utils/format";
 
-export default function ClientBookPage({ clients, tasks }) {
+export default function ClientBookPage({ clients, tasks, onOpenImport }) {
   const [query, setQuery] = useState("");
 
   const filteredClients = useMemo(() => {
@@ -17,6 +18,8 @@ export default function ClientBookPage({ clients, tasks }) {
         client.email,
         client.mobile,
         client.familyName,
+        client.notes,
+        client.nextAction,
       ]
         .filter(Boolean)
         .join(" ")
@@ -27,16 +30,25 @@ export default function ClientBookPage({ clients, tasks }) {
 
   return (
     <div className="page-stack">
-      <section className="surface-card surface-card-hero">
-        <div className="panel-kicker">Clients</div>
-        <h3>Client book</h3>
+      <section className="workspace-card page-hero">
+        <div>
+          <div className="section-kicker">Clients</div>
+          <h3>Client book</h3>
+          <p>
+            Every client profile is searchable, editable, and linked to follow-ups, portfolio data, and meeting history.
+          </p>
+        </div>
+        <button className="btn btn-primary" onClick={onOpenImport}>
+          <Plus size={14} />
+          Bulk import clients
+        </button>
       </section>
 
-      <section className="surface-card">
+      <section className="workspace-card">
         <div className="filter-bar single-filter-bar">
           <input
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search client, code, family, city, email, or mobile"
+            placeholder="Search client, code, family, city, email, notes, or mobile"
             value={query}
           />
         </div>
@@ -81,7 +93,7 @@ export default function ClientBookPage({ clients, tasks }) {
             );
           })
         ) : (
-          <section className="surface-card empty-card-pro">
+          <section className="workspace-card empty-card-pro">
             <h4>No client records yet</h4>
             <p>Meeting logs will start shaping this relationship book automatically.</p>
           </section>

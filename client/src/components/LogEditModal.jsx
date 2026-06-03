@@ -15,44 +15,49 @@ const EMPTY = {
 export default function LogEditModal({ log, onClose, onSave }) {
   const [form, setForm] = useState(EMPTY);
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (!log) return;
     setForm({
-      clientName:     log.clientName,
-      location:       log.location,
-      notes:          log.notes,
-      meetingType:    log.meetingType || "review",
-      priority:       log.priority   || "medium",
-      outcome:        log.outcome    || "",
+      clientName: log.clientName,
+      location: log.location,
+      notes: log.notes,
+      meetingType: log.meetingType || "review",
+      priority: log.priority || "medium",
+      outcome: log.outcome || "",
       followUpSummary: log.followUpSummary || "",
-      followUpDate:   log.followUpDate ? log.followUpDate.slice(0, 10) : "",
+      followUpDate: log.followUpDate ? log.followUpDate.slice(0, 10) : "",
     });
+    setError("");
   }, [log]);
 
   if (!log) return null;
 
-  const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
+  const set = (key) => (event) => setForm((current) => ({ ...current, [key]: event.target.value }));
 
-  async function handleSubmit(e) {
-    e.preventDefault();
+  async function handleSubmit(event) {
+    event.preventDefault();
     setBusy(true);
+    setError("");
     try {
       await onSave(log, { ...form, followUpDate: form.followUpDate || undefined });
+    } catch (err) {
+      setError(err.message || "Unable to save the log.");
     } finally {
       setBusy(false);
     }
   }
 
   return (
-    <div className="modal-backdrop" onClick={onClose} role="presentation">
-      <div className="modal-shell" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal aria-label="Edit meeting log">
-        <div className="modal-header">
+    <div className="dialog-backdrop" onClick={onClose} role="presentation">
+      <div className="dialog-shell" onClick={(event) => event.stopPropagation()} role="dialog" aria-modal aria-label="Edit meeting log">
+        <div className="dialog-header">
           <div>
-            <div className="panel-kicker">Editing</div>
+            <div className="section-kicker">Editing</div>
             <h3>Update meeting record</h3>
           </div>
-          <button className="icon-button" onClick={onClose} aria-label="Close">
+          <button className="icon-btn" onClick={onClose} aria-label="Close">
             <X size={14} />
           </button>
         </div>
@@ -110,9 +115,15 @@ export default function LogEditModal({ log, onClose, onSave }) {
             <input value={form.followUpSummary} onChange={set("followUpSummary")} />
           </div>
 
-          <div className="modal-actions">
-            <button type="button" className="secondary" onClick={onClose}>Cancel</button>
-            <button type="submit" disabled={busy}>{busy ? "Saving…" : "Save changes"}</button>
+          {error ? <div className="inline-error">{error}</div> : null}
+
+          <div className="dialog-actions">
+            <button type="button" className="btn btn-secondary" onClick={onClose}>
+              Cancel
+            </button>
+            <button type="submit" className="btn btn-primary" disabled={busy}>
+              {busy ? "Saving..." : "Save changes"}
+            </button>
           </div>
         </form>
       </div>

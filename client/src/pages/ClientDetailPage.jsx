@@ -1,8 +1,19 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import TaskComposer from "../components/TaskComposer";
 import TaskList from "../components/TaskList";
 import { formatDate, formatDateOnly } from "../utils/format";
+
+const makeDraft = (client) => ({
+  primaryHolderName: client?.primaryHolderName || "",
+  email: client?.email || "",
+  mobile: client?.mobile || "",
+  city: client?.city || "",
+  familyName: client?.familyName || "",
+  relationshipStatus: client?.relationshipStatus || "active",
+  notes: client?.notes || "",
+  nextAction: client?.nextAction || "",
+});
 
 export default function ClientDetailPage({
   clients,
@@ -15,6 +26,19 @@ export default function ClientDetailPage({
 }) {
   const { clientId } = useParams();
   const client = clients.find((item) => item._id === clientId);
+  const [draft, setDraft] = useState(makeDraft(client));
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    setDraft(makeDraft(client));
+    setError("");
+  }, [client]);
+
+  const dirty = useMemo(() => {
+    if (!client) return false;
+    return Object.keys(draft).some((key) => (draft[key] || "") !== (makeDraft(client)[key] || ""));
+  }, [client, draft]);
 
   if (!clientId) {
     return <Navigate replace to="/app/clients" />;
@@ -23,7 +47,7 @@ export default function ClientDetailPage({
   if (!client) {
     return (
       <div className="page-stack">
-        <section className="surface-card empty-state">
+        <section className="workspace-card empty-state">
           <h4>Client record not found</h4>
           <p>This relationship record may not exist yet or may be outside your current access scope.</p>
           <Link className="inline-link" to="/app/clients">
@@ -37,14 +61,27 @@ export default function ClientDetailPage({
   const clientLogs = logs.filter((log) => log.clientId === clientId);
   const clientTasks = tasks.filter((task) => task.clientId === clientId);
 
-  async function handleFieldSave(field, value) {
-    await onUpdateClient(clientId, { [field]: value });
+  async function handleSave() {
+    setBusy(true);
+    setError("");
+    try {
+      await onUpdateClient(clientId, draft);
+    } catch (err) {
+      setError(err.message || "Unable to save the client profile.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function handleReset() {
+    setDraft(makeDraft(client));
+    setError("");
   }
 
   return (
     <div className="page-stack">
-      <section className="surface-card client-detail-hero">
-        <div className="panel-kicker">Relationship workspace</div>
+      <section className="workspace-card client-detail-hero">
+        <div className="section-kicker">Relationship workspace</div>
         <div className="client-detail-top">
           <div>
             <h3>{client.primaryHolderName}</h3>
@@ -78,37 +115,55 @@ export default function ClientDetailPage({
       </section>
 
       <div className="two-column-grid two-column-grid-wide">
-        <section className="surface-card">
-          <div className="panel-kicker">Profile</div>
-          <h3>Relationship details</h3>
-          <div className="profile-grid">
-            <EditableField label="Client name" onSave={(value) => handleFieldSave("primaryHolderName", value)} value={client.primaryHolderName || ""} />
-            <EditableField label="Email" onSave={(value) => handleFieldSave("email", value)} value={client.email || ""} />
-            <EditableField label="Mobile" onSave={(value) => handleFieldSave("mobile", value)} value={client.mobile || ""} />
-            <EditableField label="City" onSave={(value) => handleFieldSave("city", value)} value={client.city || ""} />
-            <EditableField label="Family name" onSave={(value) => handleFieldSave("familyName", value)} value={client.familyName || ""} />
-            <EditableField
-              label="Relationship status"
-              onSave={(value) => handleFieldSave("relationshipStatus", value)}
-              value={client.relationshipStatus || "active"}
-            />
+        <section className="workspace-card">
+          <div className="section-kicker">Profile</div>
+          <div className="section-heading-row">
+            <h3>Relationship details</h3>
+            <div className="action-row">
+              <button className="btn btn-secondary btn-sm" onClick={handleReset} disabled={!dirty || busy}>
+                Reset
+              </button>
+              <button className="btn btn-primary btn-sm" onClick={handleSave} disabled={!dirty || busy}>
+                {busy ? "Saving..." : "Save changes"}
+              </button>
+            </div>
           </div>
+
+          {error ? <div className="inline-error">{error}</div> : null}
+
+          <div className="profile-grid">
+            <EditableField label="Client name" value={draft.primaryHolderName} onChange={(value) => setDraft((current) => ({ ...current, primaryHolderName: value }))} />
+            <EditableField label="Email" value={draft.email} onChange={(value) => setDraft((current) => ({ ...current, email: value }))} />
+            <EditableField label="Mobile" value={draft.mobile} onChange={(value) => setDraft((current) => ({ ...current, mobile: value }))} />
+            <EditableField label="City" value={draft.city} onChange={(value) => setDraft((current) => ({ ...current, city: value }))} />
+            <EditableField label="Family name" value={draft.familyName} onChange={(value) => setDraft((current) => ({ ...current, familyName: value }))} />
+            <label className="field">
+              <span>Relationship status</span>
+              <select value={draft.relationshipStatus} onChange={(event) => setDraft((current) => ({ ...current, relationshipStatus: event.target.value }))}>
+                <option value="active">Active</option>
+                <option value="prospect">Prospect</option>
+                <option value="inactive">Inactive</option>
+                <option value="closed">Closed</option>
+              </select>
+            </label>
+          </div>
+
           <EditableTextArea
             label="Relationship notes"
-            onSave={(value) => handleFieldSave("notes", value)}
+            value={draft.notes}
+            onChange={(value) => setDraft((current) => ({ ...current, notes: value }))}
             rows={4}
-            value={client.notes || ""}
           />
           <EditableTextArea
             label="Next action"
-            onSave={(value) => handleFieldSave("nextAction", value)}
+            value={draft.nextAction}
+            onChange={(value) => setDraft((current) => ({ ...current, nextAction: value }))}
             rows={3}
-            value={client.nextAction || ""}
           />
         </section>
 
-        <section className="surface-card">
-          <div className="panel-kicker">Follow-up desk</div>
+        <section className="workspace-card">
+          <div className="section-kicker">Follow-up desk</div>
           <h3>Tasks and reminders</h3>
           <TaskComposer clientId={clientId} onCreate={onCreateTask} />
           <TaskList
@@ -120,14 +175,14 @@ export default function ClientDetailPage({
         </section>
       </div>
 
-      <section className="surface-card">
-        <div className="panel-kicker">Meeting timeline</div>
+      <section className="workspace-card">
+        <div className="section-kicker">Meeting timeline</div>
         <h3>Conversation history</h3>
         {clientLogs.length ? (
           <div className="timeline-list">
             {clientLogs.map((log) => (
               <article className="timeline-row timeline-row-stacked" key={log._id}>
-                <div className="timeline-copy" style={{ whiteSpace: "pre-wrap", wordWrap: "break-word", overflowWrap: "break-word", maxWidth: "100%" }}>
+                <div className="timeline-copy">
                   <strong>{log.meetingType || "review"}</strong>
                   <p>{log.notes}</p>
                   <div className="timeline-meta-line">
@@ -156,20 +211,20 @@ export default function ClientDetailPage({
   );
 }
 
-function EditableField({ label, value, onSave }) {
+function EditableField({ label, value, onChange }) {
   return (
     <label className="field">
       <span>{label}</span>
-      <input defaultValue={value} onBlur={(event) => onSave(event.target.value)} />
+      <input value={value} onChange={(event) => onChange(event.target.value)} />
     </label>
   );
 }
 
-function EditableTextArea({ label, value, rows, onSave }) {
+function EditableTextArea({ label, value, rows, onChange }) {
   return (
     <label className="field">
       <span>{label}</span>
-      <textarea defaultValue={value} onBlur={(event) => onSave(event.target.value)} rows={rows} />
+      <textarea value={value} onChange={(event) => onChange(event.target.value)} rows={rows} />
     </label>
   );
 }

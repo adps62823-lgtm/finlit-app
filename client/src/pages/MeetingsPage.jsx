@@ -16,23 +16,20 @@ export default function MeetingsPage({
 
   async function handleCreate(payload) {
     await onCreateLog(payload);
-    setFormOpen(false); // auto-close the form after successful save on mobile
+    setFormOpen(false);
   }
 
   return (
     <div className="page-stack">
-      {/* ── Page header ── */}
-      <section className="surface-card surface-card-hero meetings-page-header">
+      <section className="workspace-card page-hero surface-card-hero meetings-page-header">
         <div>
-          <div className="panel-kicker">Meetings</div>
-          <h3 style={{ fontSize: 18, fontWeight: 700, color: "var(--text)", marginTop: 2 }}>
-            Meeting register
-          </h3>
+          <div className="section-kicker">Meetings</div>
+          <h3>Meeting register</h3>
+          <p>Record field conversations, lock the follow-up, and keep context tied to the client book.</p>
         </div>
-        {/* "New log" button — only visible on mobile/tablet (hidden on desktop via CSS) */}
         <button
-          className="meetings-fab-trigger"
-          onClick={() => setFormOpen((s) => !s)}
+          className="btn btn-primary meetings-fab-trigger"
+          onClick={() => setFormOpen((value) => !value)}
           aria-label={formOpen ? "Close form" : "Log a new meeting"}
         >
           {formOpen ? <X size={15} /> : <Plus size={15} />}
@@ -40,14 +37,11 @@ export default function MeetingsPage({
         </button>
       </section>
 
-      {/* ── Desktop layout: side-by-side ── */}
       <div className="meetings-page-grid">
-        {/* Form column — always visible on desktop; toggled on mobile */}
         <div className={`meetings-form-col${formOpen ? " meetings-form-col--open" : ""}`}>
           <MeetingLogForm onCreate={handleCreate} />
         </div>
 
-        {/* Log list — always visible */}
         <MeetingLogList
           filters={filters}
           logs={logs}

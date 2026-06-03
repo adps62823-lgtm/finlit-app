@@ -3,26 +3,28 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase";
 import { normalizeLoginToEmail } from "../utils/auth";
 
-export default function AuthCard({ onLogin }) {
-  const [loginId, setLoginId]   = useState("");
+export default function AuthCard({ onLogin, errorMessage = "" }) {
+  const [loginId, setLoginId] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError]       = useState("");
-  const [busy, setBusy]         = useState(false);
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
 
   async function handleSubmit(event) {
     event.preventDefault();
     setBusy(true);
     setError("");
     try {
-      const email       = normalizeLoginToEmail(loginId);
+      const email = normalizeLoginToEmail(loginId);
       const credentials = await signInWithEmailAndPassword(auth, email, password);
-      const token       = await credentials.user.getIdToken();
-      localStorage.setItem("authToken", token);
-      await onLogin(token);
+      const sessionToken = await credentials.user.getIdToken();
+      localStorage.setItem("authToken", sessionToken);
+      await onLogin(sessionToken);
     } catch (err) {
-      setError(err.code === "auth/invalid-credential" || err.code === "auth/wrong-password"
-        ? "Incorrect username or password."
-        : err.message);
+      setError(
+        err.code === "auth/invalid-credential" || err.code === "auth/wrong-password"
+          ? "Incorrect username or password."
+          : err.message
+      );
     } finally {
       setBusy(false);
     }
@@ -31,15 +33,13 @@ export default function AuthCard({ onLogin }) {
   return (
     <main className="auth-layout-simple">
       <section className="auth-panel-simple">
-
-        {/* Logo mark */}
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <img src="/logo.png" className="auth-logo" aria-hidden="true" />
           <span style={{ fontSize: 18, fontWeight: 700, letterSpacing: "-0.02em" }}>Finlit Financial Services</span>
         </div>
 
         <div className="auth-heading">
-          <div className="eyebrow">Command centre</div>
+          <div className="eyebrow">Command center</div>
           <h2>Welcome back</h2>
           <p className="muted">Sign in with your team username or email address.</p>
         </div>
@@ -49,7 +49,7 @@ export default function AuthCard({ onLogin }) {
             <span>Username or email</span>
             <input
               value={loginId}
-              onChange={(e) => setLoginId(e.target.value)}
+              onChange={(event) => setLoginId(event.target.value)}
               type="text"
               placeholder="e.g. dsingh or dsingh@finlit.local"
               autoComplete="username"
@@ -62,7 +62,7 @@ export default function AuthCard({ onLogin }) {
             <span>Password</span>
             <input
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(event) => setPassword(event.target.value)}
               type="password"
               placeholder="Enter your password"
               autoComplete="current-password"
@@ -70,10 +70,10 @@ export default function AuthCard({ onLogin }) {
             />
           </div>
 
-          {error && <p className="error">{error}</p>}
+          {(error || errorMessage) && <p className="error">{error || errorMessage}</p>}
 
           <button disabled={busy} type="submit" style={{ marginTop: 4 }}>
-            {busy ? "Signing in…" : "Continue →"}
+            {busy ? "Signing in..." : "Continue ->"}
           </button>
         </form>
 

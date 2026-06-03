@@ -1,11 +1,11 @@
 import React, { useEffect, useRef } from "react";
 
-export default function Splash({ message = "Loading…" }) {
+export default function Splash({ message = "Loading..." }) {
   const rootRef = useRef(null);
 
   useEffect(() => {
-    // Safety valve only — if the app genuinely hangs for 6s, fade the splash
-    // so users aren't permanently stuck. Normal loads dismiss via unmount.
+    // Safety valve only - if the app genuinely hangs for 6s, fade the splash
+    // so users are not permanently stuck. Normal loads dismiss via unmount.
     const timer = setTimeout(() => {
       if (rootRef.current) {
         rootRef.current.style.opacity = "0";

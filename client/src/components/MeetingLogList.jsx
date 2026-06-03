@@ -1,40 +1,47 @@
-import React from "react";
+import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Pencil, Trash2, ArrowUpRight } from "lucide-react";
 import { formatDate, formatDateOnly } from "../utils/format";
 
 export default function MeetingLogList({ logs, user, filters, onFilterChange, onUpdate, onDelete }) {
-  const staffNames = [...new Set(logs.map((l) => l.staffName))].sort();
+  const [activeDeleteId, setActiveDeleteId] = useState("");
+  const staffNames = useMemo(() => [...new Set(logs.map((log) => log.staffName))].sort(), [logs]);
+
+  async function handleDelete(logId) {
+    setActiveDeleteId(logId);
+    try {
+      await onDelete(logId);
+    } finally {
+      setActiveDeleteId("");
+    }
+  }
 
   return (
-    <section className="surface-card">
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "var(--s3)" }}>
+    <section className="workspace-card">
+      <div className="section-heading-row">
         <div>
-          <div className="panel-kicker">History</div>
-          <h3 style={{ fontSize: 17, fontWeight: 700, color: "var(--text)" }}>All meetings</h3>
+          <div className="section-kicker">History</div>
+          <h3>All meetings</h3>
         </div>
-        <span style={{ fontSize: 12, color: "var(--text-3)", fontFamily: "var(--font-mono)" }}>
-          {logs.length} records
-        </span>
+        <span className="mono-chip">{logs.length} records</span>
       </div>
 
-      <div className="filter-bar" style={{ marginBottom: "var(--s4)" }}>
+      <div className="filter-bar">
         <input
           value={filters.query}
-          onChange={(e) => onFilterChange("query", e.target.value)}
-          placeholder="Search client, location, notes, or staff…"
+          onChange={(event) => onFilterChange("query", event.target.value)}
+          placeholder="Search client, location, notes, or staff..."
         />
-        {user.role === "owner" && (
-          <select
-            value={filters.staff}
-            onChange={(e) => onFilterChange("staff", e.target.value)}
-          >
+        {user.role === "owner" ? (
+          <select value={filters.staff} onChange={(event) => onFilterChange("staff", event.target.value)}>
             <option value="">All staff</option>
             {staffNames.map((name) => (
-              <option key={name} value={name}>{name}</option>
+              <option key={name} value={name}>
+                {name}
+              </option>
             ))}
           </select>
-        )}
+        ) : null}
       </div>
 
       {logs.length === 0 ? (
@@ -44,72 +51,63 @@ export default function MeetingLogList({ logs, user, filters, onFilterChange, on
         </div>
       ) : (
         <div className="log-list">
-          {logs.map((log) => (
-            <article className="log-record" key={log._id}>
-              <div className="log-record-header">
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div className="log-record-client-row">
-                    <span className="log-record-client">{log.clientName}</span>
-                    <span className={`priority-${log.priority}`} style={{ display: "inline-flex", alignItems: "center", padding: "2px 8px", borderRadius: 99, fontSize: 11, fontWeight: 600 }}>
-                      {log.priority}
+          {logs.map((log) => {
+            const deleting = activeDeleteId === log._id;
+            return (
+              <article className="log-record" key={log._id}>
+                <div className="log-record-header">
+                  <div className="log-record-copy">
+                    <div className="log-record-client-row">
+                      <span className="log-record-client">{log.clientName}</span>
+                      <span className={`priority-${log.priority}`}>{log.priority}</span>
+                      {log.clientId ? (
+                        <Link className="inline-link" to={`/app/clients/${log.clientId}`}>
+                          Profile <ArrowUpRight size={11} />
+                        </Link>
+                      ) : null}
+                    </div>
+                    <div className="log-record-meta">
+                      {log.staffName} . {log.location} . {formatDate(log.createdAt)}
+                    </div>
+                  </div>
+
+                  <div className="action-row">
+                    <button
+                      className="icon-btn"
+                      onClick={() => onUpdate(log)}
+                      title="Edit log"
+                      aria-label="Edit log"
+                      disabled={deleting}
+                    >
+                      <Pencil size={13} />
+                    </button>
+                    <button
+                      className="icon-btn danger"
+                      onClick={() => handleDelete(log._id)}
+                      title="Delete log"
+                      aria-label="Delete log"
+                      disabled={deleting}
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  </div>
+                </div>
+
+                <p className="log-record-notes">{log.notes}</p>
+
+                <div className="log-record-footer">
+                  <span className="pill muted">{log.meetingType || "review"}</span>
+                  {log.outcome ? <span>Outcome: {log.outcome}</span> : null}
+                  {log.followUpSummary ? (
+                    <span>
+                      Follow-up: {log.followUpSummary}
+                      {log.followUpDate ? ` . ${formatDateOnly(log.followUpDate)}` : ""}
                     </span>
-                    {log.clientId && (
-                      <Link className="inline-link" to={`/app/clients/${log.clientId}`} style={{ display: "inline-flex", alignItems: "center", gap: 3 }}>
-                        Profile <ArrowUpRight size={11} />
-                      </Link>
-                    )}
-                  </div>
-                  <div className="log-record-meta">
-                    {log.staffName} · {log.location} · {formatDate(log.createdAt)}
-                  </div>
+                  ) : null}
                 </div>
-
-                <div className="action-row">
-                  <button
-                    className="icon-button"
-                    onClick={() => onUpdate(log)}
-                    title="Edit log"
-                    aria-label="Edit log"
-                  >
-                    <Pencil size={13} />
-                  </button>
-                  <button
-                    className="icon-button"
-                    onClick={() => onDelete(log._id)}
-                    title="Delete log"
-                    aria-label="Delete log"
-                    style={{ color: "var(--red)" }}
-                  >
-                    <Trash2 size={13} />
-                  </button>
-                </div>
-              </div>
-
-              <p className="log-record-notes">{log.notes}</p>
-
-              <div className="log-record-footer">
-                <span
-                  style={{
-                    background: "var(--surface-3)",
-                    padding: "2px 8px",
-                    borderRadius: 4,
-                    fontSize: 11,
-                    fontWeight: 600,
-                    color: "var(--text-2)",
-                  }}
-                >
-                  {log.meetingType || "review"}
-                </span>
-                {log.outcome && <span>Outcome: {log.outcome}</span>}
-                {log.followUpSummary && (
-                  <span>
-                    Follow-up: {log.followUpSummary}
-                    {log.followUpDate ? ` · ${formatDateOnly(log.followUpDate)}` : ""}
-                  </span>
-                )}
-              </div>
-            </article>
-          ))}
+              </article>
+            );
+          })}
         </div>
       )}
     </section>

@@ -1,7 +1,7 @@
 from datetime import date, datetime, time, timezone
 from typing import Optional
 
-from app.database import get_clients_collection, get_logs_collection, get_tasks_collection
+from app.database import get_clients_collection, get_logs_collection, get_tasks_collection, get_users_collection
 from app.utils import object_id, utc_now
 
 
@@ -13,6 +13,19 @@ def date_to_utc_datetime(value: Optional[date]) -> Optional[datetime]:
     if value is None:
         return None
     return datetime.combine(value, time.min, tzinfo=timezone.utc)
+
+
+def _normalize_text(value: Optional[str]) -> str:
+    return " ".join((value or "").strip().lower().split())
+
+
+def _find_assigned_rm(user: dict, assigned_email: Optional[str]) -> dict:
+    users = get_users_collection()
+    if assigned_email:
+        candidate = users.find_one({"email": assigned_email.strip().lower()})
+        if candidate:
+            return candidate
+    return user
 
 
 def upsert_client_from_meeting(client_name: str, location: str, notes: str, user: dict) -> dict:
@@ -59,6 +72,65 @@ def upsert_client_from_meeting(client_name: str, location: str, notes: str, user
     }
     result = clients.insert_one(document)
     return clients.find_one({"_id": result.inserted_id})
+
+
+def upsert_client_from_payload(payload, user: dict) -> tuple[dict, bool]:
+    now = utc_now()
+    clients = get_clients_collection()
+    normalized_name = _normalize_text(payload.primaryHolderName)
+    client_code = (payload.clientCode or "").strip() or f"CLI-{now.strftime('%Y%m%d%H%M%S%f')}"
+    search_query = {
+        "$or": [
+            {"clientCode": client_code},
+            {"searchName": normalized_name},
+        ]
+    }
+    if payload.email:
+        search_query["$or"].append({"email": payload.email.strip().lower()})
+    if payload.mobile:
+        search_query["$or"].append({"mobile": payload.mobile.strip()})
+
+    existing = clients.find_one(search_query)
+    assigned_rm = _find_assigned_rm(user, payload.assignedRmEmail)
+    next_review_date = date_to_utc_datetime(payload.nextReviewDate)
+    patch = {
+        "clientCode": client_code,
+        "primaryHolderName": payload.primaryHolderName.strip(),
+        "searchName": normalized_name,
+        "email": (payload.email or "").strip().lower(),
+        "mobile": (payload.mobile or "").strip(),
+        "city": (payload.city or "").strip(),
+        "familyName": (payload.familyName or "").strip(),
+        "relationshipStatus": (payload.relationshipStatus or "active").strip() or "active",
+        "notes": (payload.notes or "").strip(),
+        "nextAction": (payload.nextAction or "").strip(),
+        "nextReviewDate": next_review_date,
+        "source": (payload.source or "bulk_import").strip(),
+        "assignedRmUserId": assigned_rm["_id"],
+        "assignedRmName": assigned_rm.get("name", ""),
+        "ownerUserId": user["_id"],
+        "updatedAt": now,
+    }
+
+    if existing:
+        clients.update_one({"_id": existing["_id"]}, {"$set": patch})
+        updated = clients.find_one({"_id": existing["_id"]})
+        return updated, False
+
+    document = {
+        **patch,
+        "meetingCount": 0,
+        "openTaskCount": 0,
+        "overdueTaskCount": 0,
+        "nextFollowUpDate": next_review_date,
+        "lastMeetingAt": None,
+        "lastMeetingLocation": "",
+        "latestNotes": patch["notes"],
+        "lastActivityAt": None,
+        "createdAt": now,
+    }
+    result = clients.insert_one(document)
+    return clients.find_one({"_id": result.inserted_id}), True
 
 
 def ensure_client_link_for_log(log: dict, fallback_user: Optional[dict] = None) -> Optional[dict]:

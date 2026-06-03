@@ -1,21 +1,25 @@
 import React, { useState } from "react";
+import { Paperclip, Send } from "lucide-react";
 import { formatDate } from "../utils/format";
 
 export default function ChatPanel({ messages, onSend }) {
   const [text, setText] = useState("");
   const [file, setFile] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
 
   async function handleSubmit(event) {
     event.preventDefault();
     if (!text.trim() && !file) return;
 
     setBusy(true);
+    setError("");
     try {
       await onSend({ text: text.trim(), file });
       setText("");
       setFile(null);
-      event.target.reset();
+    } catch (err) {
+      setError(err.message || "Failed to send message.");
     } finally {
       setBusy(false);
     }
@@ -23,11 +27,11 @@ export default function ChatPanel({ messages, onSend }) {
 
   return (
     <section className="workspace-card chat-panel">
-      <div className="section-kicker">Team Channel</div>
+      <div className="section-kicker">Team channel</div>
       <div className="section-heading-row">
         <div>
           <h3>Realtime collaboration room</h3>
-          <p>Use this for internal handoffs, document drops, client context, and same-day escalation.</p>
+          <p>Use this for handoffs, internal questions, and file drops without leaving the page.</p>
         </div>
       </div>
 
@@ -35,7 +39,7 @@ export default function ChatPanel({ messages, onSend }) {
         {messages.length === 0 ? (
           <div className="empty-state">
             <h4>No messages yet</h4>
-            <p>The first field update or shared file will appear here.</p>
+            <p>The first internal note or file will appear here.</p>
           </div>
         ) : null}
 
@@ -62,12 +66,17 @@ export default function ChatPanel({ messages, onSend }) {
           placeholder="Share a client update, task handoff, or internal note."
           rows="4"
         />
+
+        {error ? <div className="inline-error">{error}</div> : null}
+
         <div className="chat-composer-footer">
           <label className="file-pill">
+            <Paperclip size={14} />
             <span>{file ? file.name : "Attach document, audio, image, or video"}</span>
             <input onChange={(event) => setFile(event.target.files?.[0] || null)} type="file" />
           </label>
-          <button disabled={busy} type="submit">
+          <button disabled={busy} type="submit" className="btn btn-primary">
+            <Send size={14} />
             {busy ? "Sending..." : "Send to Team Channel"}
           </button>
         </div>

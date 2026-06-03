@@ -1,302 +1,241 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
-  LayoutDashboard, Users, BookOpen, ShieldCheck, FlaskConical,
-  LogOut, Menu, X, Moon, Sun, SlidersHorizontal, ChevronRight,
+  BellRing,
+  BookOpen,
+  BriefcaseBusiness,
+  ChevronRight,
+  CirclePlus,
+  LayoutDashboard,
+  LogOut,
+  Menu,
+  Search,
+  ShieldCheck,
+  Sparkles,
+  SunMedium,
+  Users,
+  X,
+  MoonStar,
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 
 const NAV = [
-  { to: "/app/command",      label: "Overview",     Icon: LayoutDashboard },
-  { to: "/app/clients",      label: "Clients",      Icon: Users },
-  { to: "/app/meetings",     label: "Meetings",     Icon: BookOpen },
-  { to: "/app/transactions", label: "Orders",       Icon: ShieldCheck },
-  { to: "/app/research",     label: "Tools",        Icon: FlaskConical },
+  { to: "/app/command", label: "Command Center", Icon: LayoutDashboard },
+  { to: "/app/clients", label: "Client Book", Icon: Users },
+  { to: "/app/meetings", label: "Meeting Desk", Icon: BookOpen },
+  { to: "/app/transactions", label: "Transactions", Icon: ShieldCheck },
+  { to: "/app/research", label: "Research Lab", Icon: BriefcaseBusiness },
 ];
 
-const PAGE_TITLE = {
-  "/app/command":      "Overview",
-  "/app/clients":      "Clients",
-  "/app/meetings":     "Meetings",
-  "/app/transactions": "Orders",
-  "/app/research":     "Tools",
+const TITLES = {
+  "/app/command": {
+    label: "Command Center",
+    subtitle: "Daily pulse, staff coverage, and urgent follow-ups.",
+  },
+  "/app/clients": {
+    label: "Client Book",
+    subtitle: "Portfolio-aware client profiles and bulk client import.",
+  },
+  "/app/meetings": {
+    label: "Meeting Desk",
+    subtitle: "Field logs, handoffs, and follow-up capture.",
+  },
+  "/app/transactions": {
+    label: "Transactions",
+    subtitle: "AdvisorX-style workflow rail for future integrations.",
+  },
+  "/app/research": {
+    label: "Research Lab",
+    subtitle: "Planning tools, calculators, and market surfaces.",
+  },
 };
 
-export default function AppShell({ user, stats, onLogout, onToggleTheme, theme, children }) {
+function StatChip({ label, value }) {
+  return (
+    <div className="stat-chip">
+      <strong>{value}</strong>
+      <span>{label}</span>
+    </div>
+  );
+}
+
+export default function AppShell({
+  user,
+  stats,
+  dueTasks = [],
+  notificationsEnabled,
+  onEnableNotifications,
+  onLogout,
+  onToggleTheme,
+  onOpenSearch,
+  onOpenImport,
+  theme,
+  children,
+}) {
   const location = useLocation();
-  const [drawerOpen,      setDrawerOpen]      = useState(false);
-  const [personalOpen,    setPersonalOpen]    = useState(false);
-  const [displayName,     setDisplayName]     = useState("");
-  const [avatarColor,     setAvatarColor]     = useState("#4f6ef7");
+  const [mobileOpen, setMobileOpen] = useState(false);
 
-  /* Persist personalisation */
-  useEffect(() => {
-    const n = localStorage.getItem("finlit_displayName");
-    const c = localStorage.getItem("finlit_avatarColor");
-    if (n) setDisplayName(n);
-    if (c) setAvatarColor(c);
-  }, []);
+  const activeTitle = Object.entries(TITLES).find(([path]) =>
+    location.pathname === path || location.pathname.startsWith(`${path}/`)
+  )?.[1] || TITLES["/app/command"];
 
-  useEffect(() => { if (displayName) localStorage.setItem("finlit_displayName", displayName); }, [displayName]);
-  useEffect(() => { if (avatarColor)  localStorage.setItem("finlit_avatarColor",  avatarColor);  }, [avatarColor]);
-
-  const visibleName = displayName || user.name;
-  const initials    = visibleName.slice(0, 1).toUpperCase();
-
-  const title = location.pathname.startsWith("/app/clients/")
-    ? "Client workspace"
-    : PAGE_TITLE[location.pathname] || "Finlit";
+  const initials = (user?.name || user?.email || "F")
+    .split(" ")
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 
   return (
-    <div className="app-shell">
-      {/* ── Sidebar ── */}
-      <aside className="app-sidebar">
-        {/* Brand */}
-        <div className="app-brand-block">
-          <img src="/logo.png" alt="Finlit Logo" className="brand-emblem"/>
-                <span style={{ fontWeight: 700 }}>Finlit Financial Services</span>
-        </div>
-
-        {/* User */}
-        <div className="sidebar-user-panel">
-          <div
-            className="sidebar-user-avatar"
-            style={{ background: `${avatarColor}22`, borderColor: avatarColor, color: avatarColor }}
-          >
-            {initials}
-          </div>
+    <div className="workspace-shell">
+      <aside className={`workspace-sidebar${mobileOpen ? " open" : ""}`}>
+        <div className="sidebar-brand">
+          <div className="brand-mark">F</div>
           <div>
-            <div className="sidebar-user-name">{visibleName}</div>
-            <div className="sidebar-user-role">{user.role === "owner" ? "Owner" : "Staff"}</div>
+            <strong>Finlit Command</strong>
+            <span>Advisor operations desk</span>
           </div>
         </div>
 
-        {/* Nav */}
-        <nav className="sidebar-nav">
-          <div className="sidebar-nav-section">Navigation</div>
+        <div className="sidebar-user-card">
+          <div className="sidebar-avatar">{initials}</div>
+          <div className="sidebar-user-copy">
+            <strong>{user?.name || "Principal Advisor"}</strong>
+            <span>{user?.role === "owner" ? "Owner console" : "Staff workspace"}</span>
+          </div>
+        </div>
+
+        <nav className="workspace-nav">
           {NAV.map(({ to, label, Icon }) => (
             <NavLink
               key={to}
               to={to}
-              className={({ isActive }) => `sidebar-link${isActive ? " active" : ""}`}
+              className={({ isActive }) => `workspace-nav-link${isActive ? " active" : ""}`}
+              onClick={() => setMobileOpen(false)}
             >
-              <span className="sidebar-link-icon"><Icon size={15} /></span>
-              <span className="sidebar-link-title">{label}</span>
+              <Icon size={16} />
+              <span>{label}</span>
+              <ChevronRight size={14} className="nav-chevron" />
             </NavLink>
           ))}
-
-          <div className="sidebar-nav-section" style={{ marginTop: 8 }}>Preferences</div>
-
-          <button
-            className="sidebar-link"
-            onClick={onToggleTheme}
-            title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
-          >
-            <span className="sidebar-link-icon">
-              {theme === "dark" ? <Sun size={15} /> : <Moon size={15} />}
-            </span>
-            <span className="sidebar-link-title">{theme === "dark" ? "Light mode" : "Dark mode"}</span>
-          </button>
-
-          <button
-            className="sidebar-link"
-            onClick={() => setPersonalOpen((s) => !s)}
-            title="Personalize"
-          >
-            <span className="sidebar-link-icon"><SlidersHorizontal size={15} /></span>
-            <span className="sidebar-link-title">Personalize</span>
-          </button>
-
-          <button
-            className="sidebar-link"
-            style={{ color: "var(--red)", marginTop: "auto" }}
-            onClick={onLogout}
-            title="Sign out"
-          >
-            <span className="sidebar-link-icon"><LogOut size={15} /></span>
-            <span className="sidebar-link-title">Sign out</span>
-          </button>
         </nav>
 
-        {/* Quick stats */}
-        <div className="sidebar-panel">
-          <div className="sidebar-panel-heading">Quick stats</div>
-          <div className="sidebar-mini-grid">
-            {[
-              { label: "Today",   value: stats.todayLogs },
-              { label: "Clients", value: stats.uniqueClients },
-              { label: "Staff",   value: stats.teamCoverage },
-              { label: "Open",    value: stats.openTasks },
-              { label: "Due",     value: stats.overdueTasks },
-              { label: "Files",   value: stats.attachmentMessages },
-            ].map(({ label, value }) => (
-              <div key={label}>
-                <strong>{value}</strong>
-                <span>{label}</span>
-              </div>
-            ))}
+        <div className="sidebar-rail-card">
+          <div className="rail-card-title">Today at a glance</div>
+          <div className="rail-stats">
+            <StatChip label="Logs" value={stats.totalLogs} />
+            <StatChip label="Clients" value={stats.uniqueClients} />
+            <StatChip label="Open" value={stats.openTasks} />
+            <StatChip label="Due" value={stats.overdueTasks} />
           </div>
         </div>
+
+        <div className="sidebar-rail-card">
+          <div className="rail-card-title">Reminders</div>
+          {dueTasks.length ? (
+            <div className="reminder-list">
+              {dueTasks.slice(0, 3).map((task) => (
+                <div className="reminder-item" key={task._id}>
+                  <div>
+                    <strong>{task.title}</strong>
+                    <span>{task.clientName}</span>
+                  </div>
+                  <time>{task.dueLabel}</time>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="rail-empty">No due reminders right now.</p>
+          )}
+
+          {onEnableNotifications && !notificationsEnabled ? (
+            <button className="btn btn-secondary btn-sm rail-action" onClick={onEnableNotifications}>
+              <BellRing size={14} />
+              Enable alerts
+            </button>
+          ) : null}
+        </div>
+
+        <div className="sidebar-actions">
+          <button className="btn btn-secondary btn-sm" onClick={onOpenSearch}>
+            <Search size={14} />
+            Search
+          </button>
+          <button className="btn btn-primary btn-sm" onClick={onOpenImport}>
+            <CirclePlus size={14} />
+            Import clients
+          </button>
+        </div>
+
+        <button className="btn btn-ghost btn-sm logout-button" onClick={onLogout}>
+          <LogOut size={14} />
+          Sign out
+        </button>
       </aside>
 
-      {/* ── Main ── */}
-      <div className="app-main">
-        {/* Topbar */}
-        <header className="app-topbar">
-          <button
-            className="icon-button mobile-menu-button"
-            onClick={() => setDrawerOpen(true)}
-            aria-label="Open menu"
-            style={{ display: "none" }}  /* shown via CSS on mobile */
-          >
-            <Menu size={16} />
-          </button>
-
-          <h1>{title}</h1>
-
-          <div className="topbar-actions">
-            <div className="topbar-chip">
-              {new Date().toLocaleDateString("en-IN", { dateStyle: "medium" })}
+      <div className="workspace-main">
+        <header className="workspace-topbar">
+          <div className="topbar-left">
+            <button className="topbar-menu" onClick={() => setMobileOpen((value) => !value)}>
+              {mobileOpen ? <X size={18} /> : <Menu size={18} />}
+            </button>
+            <div>
+              <div className="topbar-kicker">Finlit internal platform</div>
+              <h1>{activeTitle.label}</h1>
+              <p>{activeTitle.subtitle}</p>
             </div>
-
-            <button
-              className="icon-button"
-              onClick={() => setPersonalOpen((s) => !s)}
-              title="Personalize"
-              aria-label="Personalize"
-            >
-              <SlidersHorizontal size={14} />
-            </button>
-
-            <button
-              className="icon-button"
-              onClick={onToggleTheme}
-              title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-              aria-label="Toggle theme"
-            >
-              {theme === "dark" ? <Sun size={14} /> : <Moon size={14} />}
-            </button>
-
-            <button
-              className="icon-button"
-              onClick={onLogout}
-              title="Sign out"
-              aria-label="Sign out"
-              style={{ color: "var(--red)" }}
-            >
-              <LogOut size={14} />
-            </button>
           </div>
 
-          {/* Personalisation popover */}
-          {personalOpen && (
-            <div className="personalize-popover" role="dialog" aria-label="Personalize">
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontSize: 13, fontWeight: 600 }}>Personalize</span>
-                <button className="icon-button" onClick={() => setPersonalOpen(false)} aria-label="Close">
-                  <X size={13} />
-                </button>
-              </div>
-              <div className="field">
-                <label>Display name</label>
-                <input
-                  value={displayName}
-                  onChange={(e) => setDisplayName(e.target.value)}
-                  placeholder={user.name}
-                />
-              </div>
-              <div className="field">
-                <label>Avatar color</label>
-                <input
-                  type="color"
-                  value={avatarColor}
-                  onChange={(e) => setAvatarColor(e.target.value)}
-                  style={{ height: 36, padding: 4, cursor: "pointer" }}
-                />
-              </div>
-            </div>
-          )}
+          <div className="topbar-right">
+            <button className="topbar-search" onClick={onOpenSearch}>
+              <Search size={15} />
+              <span>Search everything</span>
+              <kbd>Ctrl K</kbd>
+            </button>
+
+            <button className="icon-btn" onClick={onOpenImport} title="Import clients">
+              <CirclePlus size={15} />
+            </button>
+
+            <button
+              className="icon-btn"
+              onClick={onToggleTheme}
+              title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+            >
+              {theme === "dark" ? <SunMedium size={15} /> : <MoonStar size={15} />}
+            </button>
+
+            <button className="icon-btn" onClick={onEnableNotifications} title="Enable browser alerts">
+              <BellRing size={15} />
+            </button>
+          </div>
         </header>
 
-        {/* Page */}
-        <main className="app-page">{children}</main>
+        <main className="workspace-page">
+          <div className="workspace-badge">
+            <Sparkles size={14} />
+            Built for advisory operations, field follow-up, and owner visibility.
+          </div>
+          {children}
+        </main>
       </div>
 
-      {/* ── Mobile bottom nav ── */}
       <nav className="mobile-bottom-nav" aria-label="Main navigation">
         {NAV.slice(0, 4).map(({ to, label, Icon }) => (
           <NavLink
             key={to}
             to={to}
             className={({ isActive }) => `mobile-nav-link${isActive ? " active" : ""}`}
+            onClick={() => setMobileOpen(false)}
           >
             <Icon size={18} />
-            <span>{label}</span>
+            <span>{label.split(" ")[0]}</span>
           </NavLink>
         ))}
-        <button
-          className="mobile-nav-link"
-          onClick={() => setDrawerOpen(true)}
-          aria-label="More options"
-        >
-          <Menu size={18} />
-          <span>More</span>
+        <button className="mobile-nav-link" onClick={onOpenSearch}>
+          <Search size={18} />
+          <span>Search</span>
         </button>
       </nav>
-
-      {/* ── Mobile drawer ── */}
-      {drawerOpen && (
-        <div
-          className="mobile-drawer-backdrop"
-          onClick={() => setDrawerOpen(false)}
-          role="presentation"
-        >
-          <aside className="mobile-drawer" onClick={(e) => e.stopPropagation()}>
-            <div className="mobile-drawer-header">
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <img src="/logo.png" alt="Finlit Logo" className="brand-emblem"/>
-                <span style={{ fontWeight: 700 }}>Finlit Financial Services</span>
-              </div>
-              <button className="icon-button" onClick={() => setDrawerOpen(false)} aria-label="Close menu">
-                <X size={15} />
-              </button>
-            </div>
-
-            <div className="mobile-drawer-links">
-              {NAV.map(({ to, label, Icon }) => (
-                <NavLink
-                  key={to}
-                  to={to}
-                  className={({ isActive }) => `mobile-drawer-link${isActive ? " active" : ""}`}
-                  onClick={() => setDrawerOpen(false)}
-                >
-                  <Icon size={15} />
-                  <span>{label}</span>
-                  <ChevronRight size={12} style={{ marginLeft: "auto", opacity: 0.4 }} />
-                </NavLink>
-              ))}
-              <button
-                className="mobile-drawer-link"
-                onClick={() => { setPersonalOpen(true); setDrawerOpen(false); }}
-              >
-                <SlidersHorizontal size={15} />
-                <span>Personalize</span>
-              </button>
-              <button
-                className="mobile-drawer-link"
-                onClick={() => { onToggleTheme(); setDrawerOpen(false); }}
-              >
-                {theme === "dark" ? <Sun size={15} /> : <Moon size={15} />}
-                <span>{theme === "dark" ? "Light mode" : "Dark mode"}</span>
-              </button>
-            </div>
-
-            <button className="mobile-drawer-logout" onClick={onLogout}>
-              <LogOut size={15} />
-              <span>Sign out</span>
-            </button>
-          </aside>
-        </div>
-      )}
     </div>
   );
 }

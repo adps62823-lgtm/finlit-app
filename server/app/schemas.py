@@ -38,6 +38,21 @@ class ClientUpdate(BaseModel):
     nextReviewDate: Optional[date] = None
 
 
+class ClientCreate(BaseModel):
+    clientCode: Optional[str] = None
+    primaryHolderName: str = Field(min_length=1)
+    email: Optional[str] = None
+    mobile: Optional[str] = None
+    city: Optional[str] = None
+    familyName: Optional[str] = None
+    relationshipStatus: Optional[str] = None
+    notes: Optional[str] = None
+    nextAction: Optional[str] = None
+    nextReviewDate: Optional[date] = None
+    source: Optional[str] = "bulk_import"
+    assignedRmEmail: Optional[str] = None
+
+
 class FollowUpTaskCreate(BaseModel):
     clientId: str = Field(min_length=1)
     title: str = Field(min_length=1)

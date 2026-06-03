@@ -20,8 +20,8 @@ class RootErrorBoundary extends Component {
   render() {
     if (this.state.error) {
       return (
-        <main className="auth-layout">
-          <section className="auth-panel">
+        <main className="auth-layout-simple">
+          <section className="auth-panel-simple">
             <div className="eyebrow">Render error</div>
             <h2>Finlit could not load</h2>
             <p className="muted">
