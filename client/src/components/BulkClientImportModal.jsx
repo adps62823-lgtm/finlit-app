@@ -59,9 +59,7 @@ export default function BulkClientImportModal({ open, onClose, onImport }) {
     try {
       let payload = [];
       const input = text.trim();
-      if (!input) {
-        throw new Error("Paste a CSV or JSON list of clients first.");
-      }
+      if (!input) throw new Error("Paste CSV or JSON first.");
 
       if (input.startsWith("[")) {
         payload = JSON.parse(input);
@@ -70,7 +68,7 @@ export default function BulkClientImportModal({ open, onClose, onImport }) {
       }
 
       if (!Array.isArray(payload) || payload.length === 0) {
-        throw new Error("No client rows were found.");
+        throw new Error("No rows found.");
       }
 
       await onImport(payload);
@@ -88,16 +86,12 @@ export default function BulkClientImportModal({ open, onClose, onImport }) {
         <div className="dialog-header">
           <div>
             <div className="section-kicker">Bulk import</div>
-            <h3>Add many clients at once</h3>
+            <h3>Import clients</h3>
           </div>
-          <button className="icon-btn" onClick={onClose} aria-label="Close import modal">
+          <button className="icon-btn" onClick={onClose} aria-label="Close">
             <X size={16} />
           </button>
         </div>
-
-        <p className="dialog-note">
-          Paste CSV or JSON data exported from Excel, then the backend will upsert clients by code, email, or mobile.
-        </p>
 
         <label className="file-dropzone">
           <Upload size={16} />
@@ -114,18 +108,16 @@ export default function BulkClientImportModal({ open, onClose, onImport }) {
         />
 
         <div className="import-meta">
-          <span>{previewCount} rows detected</span>
-          <span>Columns: primaryHolderName, email, mobile, city, familyName, relationshipStatus, notes, nextAction, nextReviewDate, assignedRmEmail</span>
+          <span>{previewCount} rows</span>
+          <span>name, email, mobile, city, family, status, notes, nextAction, reviewDate, rmEmail</span>
         </div>
 
         {error ? <div className="inline-error">{error}</div> : null}
 
         <div className="dialog-actions">
-          <button className="btn btn-secondary" onClick={onClose}>
-            Cancel
-          </button>
+          <button className="btn btn-secondary" onClick={onClose}>Cancel</button>
           <button className="btn btn-primary" disabled={busy} onClick={handleSubmit}>
-            {busy ? "Importing..." : "Import clients"}
+            {busy ? "Importing..." : "Import"}
           </button>
         </div>
       </section>

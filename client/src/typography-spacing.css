@@ -1,0 +1,732 @@
+/* =============================================================
+   FINLIT — TYPOGRAPHY & SPACING IMPROVEMENTS
+   Drop this at the END of client/src/styles.css
+   (or @import it after styles.css in main.jsx)
+   ============================================================= */
+
+/* ─── 1. BASE BODY & GLOBAL RHYTHM ─────────────────────────── */
+
+body {
+  font-size: 15px;          /* up from implicit ~14px — easier on the eyes */
+  line-height: 1.6;
+  letter-spacing: -0.01em;  /* slight tightening for Manrope at larger sizes */
+}
+
+/* Consistent paragraph spacing */
+p {
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+/* ─── 2. HEADING SCALE ──────────────────────────────────────── */
+
+/* Page / section titles */
+.workspace-card h3,
+.section-heading-row h3 {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.25;
+}
+
+/* Client detail hero name */
+.client-detail-hero h3 {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+/* Page hero titles (Client Book, Meetings, etc.) */
+.page-hero h3 {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin-bottom: 0;
+}
+
+/* Topbar title */
+.workspace-topbar h1 {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  margin-top: 0;
+}
+
+/* h4 used in cards (CommandCenter panel headings, client names) */
+h4 {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.3;
+}
+
+/* ─── 3. SECTION KICKER / EYEBROW LABELS ───────────────────── */
+
+.section-kicker,
+.panel-kicker,
+.auth-heading .eyebrow,
+.rail-card-title {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+/* ─── 4. SIDEBAR ────────────────────────────────────────────── */
+
+.sidebar-brand strong {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.sidebar-brand span,
+.sidebar-user-copy span {
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
+
+.sidebar-user-copy strong {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* Nav link text */
+.workspace-nav-link span {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* Stat chips */
+.stat-chip strong {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.stat-chip span {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* Reminder items */
+.reminder-item strong {
+  font-size: 13px;
+  font-weight: 700;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.reminder-item span,
+.reminder-item time {
+  font-size: 11px;
+}
+
+/* ─── 5. METRIC CARDS ───────────────────────────────────────── */
+
+.metric-card {
+  padding: 20px 22px;
+  gap: 6px;
+}
+
+.metric-card span {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.metric-card strong {
+  font-size: 36px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.metric-card p {
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+/* ─── 6. WORKSPACE CARDS ─────────────────────────────────────── */
+
+.workspace-card {
+  padding: 20px 22px;
+}
+
+/* ─── 7. MEETING LOG RECORDS ────────────────────────────────── */
+
+.log-record {
+  padding: 16px 18px;
+  gap: 10px;
+}
+
+.log-record-client {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
+.log-record-meta {
+  font-size: 12px;
+  margin-top: 3px;
+  line-height: 1.5;
+}
+
+.log-record-notes {
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--text-2);
+}
+
+.log-record-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  font-size: 12px;
+}
+
+/* ─── 8. TASK CARDS ─────────────────────────────────────────── */
+
+.task-card {
+  padding: 14px 16px;
+  gap: 8px;
+}
+
+.task-card strong {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.task-card-details {
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.task-card-footer {
+  font-size: 12px;
+  padding-top: 4px;
+}
+
+.task-client-name {
+  font-size: 12px;
+  margin-top: 3px;
+}
+
+/* ─── 9. CLIENT CARDS ───────────────────────────────────────── */
+
+.client-card-pro {
+  padding: 18px 20px;
+  gap: 14px;
+}
+
+.client-card-topline h4 {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 3px;
+}
+
+.client-card-topline p {
+  font-size: 12px;
+}
+
+.client-card-meta span {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 3px;
+}
+
+.client-card-meta strong {
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.client-card-pro > p {
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* ─── 10. SUMMARY STAT CARDS (client detail hero) ───────────── */
+
+.summary-stat-card {
+  padding: 14px 16px;
+  gap: 4px;
+}
+
+.summary-stat-card span {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.summary-stat-card strong {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+}
+
+/* ─── 11. TIMELINE ──────────────────────────────────────────── */
+
+.timeline-row {
+  padding: 12px 14px;
+  gap: 12px;
+}
+
+.timeline-copy strong {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.timeline-copy p {
+  font-size: 13px;
+  margin-top: 3px;
+}
+
+.timeline-meta-line {
+  font-size: 11px;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.timeline-tag {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  padding: 4px 8px;
+  white-space: nowrap;
+}
+
+.follow-up-inline {
+  font-size: 13px;
+  margin-top: 8px;
+  padding: 8px 12px;
+}
+
+/* ─── 12. MINI TASK CARDS (Command Center) ──────────────────── */
+
+.mini-task-card {
+  padding: 14px 16px;
+  gap: 6px;
+}
+
+.mini-task-card strong {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.mini-task-card p {
+  font-size: 13px;
+}
+
+.mini-task-card span {
+  font-size: 12px;
+}
+
+.mini-task-top {
+  gap: 10px;
+}
+
+/* ─── 13. QUIET CLIENT CARDS ────────────────────────────────── */
+
+.quiet-client-card {
+  padding: 14px 16px;
+  gap: 4px;
+}
+
+.quiet-client-card strong {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.quiet-client-card p {
+  font-size: 12px;
+}
+
+.quiet-client-card span {
+  font-size: 12px;
+}
+
+/* ─── 14. STAFF BOARD ───────────────────────────────────────── */
+
+.staff-board-item {
+  padding: 12px 16px;
+}
+
+.staff-board-item strong {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.staff-board-item p {
+  font-size: 11px;
+  margin-top: 2px;
+}
+
+.staff-board-item > span {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+/* ─── 15. FORM FIELDS ───────────────────────────────────────── */
+
+.field span,
+.field label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.field input,
+.field textarea,
+.field select {
+  font-size: 14px;
+  padding: 11px 13px;
+}
+
+.filter-bar input,
+.filter-bar select {
+  font-size: 14px;
+  padding: 11px 14px;
+}
+
+/* ─── 16. BUTTONS ───────────────────────────────────────────── */
+
+.btn {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  height: 38px;
+  padding: 0 14px;
+}
+
+.btn-sm {
+  font-size: 12px;
+  height: 32px;
+  padding: 0 11px;
+}
+
+/* ─── 17. PILLS & STATUS BADGES ─────────────────────────────── */
+
+.status-pill,
+.priority-low,
+.priority-medium,
+.priority-high,
+.status-neutral,
+.status-overdue,
+.pill,
+.timeline-tag,
+.file-pill {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 9px;
+  letter-spacing: 0.04em;
+}
+
+.mono-chip {
+  font-size: 12px;
+  padding: 6px 10px;
+}
+
+/* ─── 18. CHAT ──────────────────────────────────────────────── */
+
+.chat-message {
+  padding: 12px 14px;
+  gap: 6px;
+}
+
+.chat-message-meta {
+  font-size: 11px;
+  gap: 10px;
+}
+
+.chat-message-meta span:first-child {
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.chat-message-body {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.chat-composer textarea {
+  font-size: 14px;
+  padding: 12px 14px;
+}
+
+/* ─── 19. DIALOGS / MODALS ──────────────────────────────────── */
+
+.dialog-shell {
+  padding: 24px;
+  gap: 16px;
+}
+
+.dialog-header h3 {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+}
+
+.dialog-note {
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.import-meta {
+  font-size: 12px;
+}
+
+.import-textarea {
+  font-size: 12px;
+  line-height: 1.6;
+  padding: 12px 14px;
+}
+
+/* Search results */
+.search-result {
+  padding: 12px 14px;
+}
+
+.search-result-title-row strong {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.search-result-title-row span {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.search-result p {
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+/* ─── 20. AUTH ──────────────────────────────────────────────── */
+
+.auth-heading h2 {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+}
+
+.auth-panel-simple {
+  gap: 20px;
+}
+
+/* ─── 21. REMINDER ITEMS ────────────────────────────────────── */
+
+.reminder-item {
+  padding: 10px 12px;
+  gap: 10px;
+}
+
+/* ─── 22. PROFILE GRID FIELDS ────────────────────────────────── */
+
+.profile-grid {
+  gap: 12px;
+  margin-top: 16px;
+}
+
+/* ─── 23. PAGE STACK GAPS ───────────────────────────────────── */
+
+.page-stack {
+  gap: 18px;
+}
+
+.two-column-grid,
+.two-column-grid-wide {
+  gap: 16px;
+}
+
+.hero-panel-metrics {
+  gap: 14px;
+}
+
+.client-grid-pro {
+  gap: 14px;
+}
+
+/* ─── 24. TOOL / RESEARCH CARDS ─────────────────────────────── */
+
+.result-card {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  padding: 14px 16px;
+  margin-top: 14px;
+}
+
+.insight-stack > div strong,
+.roadmap-grid > div strong {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.insight-stack > div p,
+.roadmap-grid > div p {
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.insight-stack > div,
+.roadmap-grid > div {
+  padding: 14px 16px;
+}
+
+/* ─── 25. TASK COMPOSER ─────────────────────────────────────── */
+
+.task-composer {
+  padding: 14px 16px;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.task-composer-actions button {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* ─── 26. INLINE ERRORS & NOTICES ───────────────────────────── */
+
+.inline-error,
+.error {
+  font-size: 13px;
+  padding: 10px 13px;
+}
+
+.notice {
+  padding: 12px 16px;
+}
+
+.notice strong {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.notice p {
+  font-size: 12px;
+  margin-top: 3px;
+}
+
+/* ─── 27. EMPTY STATES ──────────────────────────────────────── */
+
+.empty-state h4 {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.empty-state p {
+  font-size: 13px;
+}
+
+/* ─── 28. TOPBAR SEARCH BOX ─────────────────────────────────── */
+
+.topbar-search {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 0 13px;
+  min-height: 36px;
+  gap: 8px;
+}
+
+.topbar-search kbd,
+.search-field kbd {
+  font-size: 10px;
+  padding: 3px 7px;
+}
+
+/* ─── 29. MOBILE OVERRIDES ───────────────────────────────────── */
+
+@media (max-width: 920px) {
+  body {
+    font-size: 15px;
+  }
+
+  .workspace-topbar h1 {
+    font-size: 17px;
+  }
+
+  .workspace-card {
+    padding: 16px 18px;
+  }
+
+  .log-record {
+    padding: 14px 16px;
+  }
+
+  .client-card-pro {
+    padding: 16px 18px;
+  }
+
+  .metric-card strong {
+    font-size: 30px;
+  }
+
+  .section-heading-row h3,
+  .workspace-card h3 {
+    font-size: 16px;
+  }
+
+  .mobile-nav-link span {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+
+  .task-card strong,
+  .log-record-client {
+    font-size: 14px;
+  }
+
+  .summary-stat-card strong {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 640px) {
+  .metric-card {
+    padding: 16px 18px;
+  }
+
+  .metric-card strong {
+    font-size: 26px;
+  }
+
+  .client-detail-hero h3 {
+    font-size: 20px;
+  }
+
+  .dialog-shell {
+    padding: 18px;
+    gap: 14px;
+  }
+
+  .dialog-header h3 {
+    font-size: 16px;
+  }
+}

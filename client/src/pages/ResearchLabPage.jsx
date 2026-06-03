@@ -22,121 +22,47 @@ export default function ResearchLabPage() {
     <div className="page-stack">
       <section className="two-column-grid">
         <article className="surface-card">
-          <div className="panel-kicker">Planning tools</div>
-          <h3>SIP projection</h3>
+          <div className="panel-kicker">SIP projection</div>
           <div className="tool-form-pro">
             <label className="field">
               <span>Monthly SIP</span>
-              <input
-                onChange={(event) => setSip((current) => ({ ...current, monthly: Number(event.target.value) }))}
-                type="number"
-                value={sip.monthly}
-              />
-              <input
-                className="tool-slider"
-                type="range"
-                min="1000"
-                max="100000"
-                step="500"
-                value={sip.monthly}
-                onChange={(event) => setSip((current) => ({ ...current, monthly: Number(event.target.value) }))}
-              />
+              <input onChange={(e) => setSip((c) => ({ ...c, monthly: Number(e.target.value) }))} type="number" value={sip.monthly} />
+              <input className="tool-slider" type="range" min="1000" max="100000" step="500" value={sip.monthly} onChange={(e) => setSip((c) => ({ ...c, monthly: Number(e.target.value) }))} />
             </label>
             <label className="field">
-              <span>Annual return percent</span>
-              <input
-                onChange={(event) => setSip((current) => ({ ...current, rate: Number(event.target.value) }))}
-                type="number"
-                value={sip.rate}
-              />
-              <input
-                className="tool-slider"
-                type="range"
-                min="1"
-                max="30"
-                step="0.1"
-                value={sip.rate}
-                onChange={(event) => setSip((current) => ({ ...current, rate: Number(event.target.value) }))}
-              />
+              <span>Return %</span>
+              <input onChange={(e) => setSip((c) => ({ ...c, rate: Number(e.target.value) }))} type="number" value={sip.rate} />
+              <input className="tool-slider" type="range" min="1" max="30" step="0.1" value={sip.rate} onChange={(e) => setSip((c) => ({ ...c, rate: Number(e.target.value) }))} />
             </label>
             <label className="field">
               <span>Years</span>
-              <input
-                onChange={(event) => setSip((current) => ({ ...current, years: Number(event.target.value) }))}
-                type="number"
-                value={sip.years}
-              />
-              <input
-                className="tool-slider"
-                type="range"
-                min="1"
-                max="40"
-                step="1"
-                value={sip.years}
-                onChange={(event) => setSip((current) => ({ ...current, years: Number(event.target.value) }))}
-              />
+              <input onChange={(e) => setSip((c) => ({ ...c, years: Number(e.target.value) }))} type="number" value={sip.years} />
+              <input className="tool-slider" type="range" min="1" max="40" step="1" value={sip.years} onChange={(e) => setSip((c) => ({ ...c, years: Number(e.target.value) }))} />
             </label>
           </div>
-          <div className="result-card">Projected corpus: Rs {Math.round(sipCorpus).toLocaleString("en-IN")}</div>
+          <div className="result-card">Corpus: ₹{Math.round(sipCorpus).toLocaleString("en-IN")}</div>
         </article>
 
         <article className="surface-card">
-          <div className="panel-kicker">Advisory utility</div>
-          <h3>EMI calculator</h3>
+          <div className="panel-kicker">EMI calculator</div>
           <div className="tool-form-pro">
             <label className="field">
               <span>Loan amount</span>
-              <input
-                onChange={(event) => setLoan((current) => ({ ...current, principal: Number(event.target.value) }))}
-                type="number"
-                value={loan.principal}
-              />
-              <input
-                className="tool-slider"
-                type="range"
-                min="100000"
-                max="20000000"
-                step="50000"
-                value={loan.principal}
-                onChange={(event) => setLoan((current) => ({ ...current, principal: Number(event.target.value) }))}
-              />
+              <input onChange={(e) => setLoan((c) => ({ ...c, principal: Number(e.target.value) }))} type="number" value={loan.principal} />
+              <input className="tool-slider" type="range" min="100000" max="20000000" step="50000" value={loan.principal} onChange={(e) => setLoan((c) => ({ ...c, principal: Number(e.target.value) }))} />
             </label>
             <label className="field">
-              <span>Annual interest percent</span>
-              <input
-                onChange={(event) => setLoan((current) => ({ ...current, rate: Number(event.target.value) }))}
-                type="number"
-                value={loan.rate}
-              />
-              <input
-                className="tool-slider"
-                type="range"
-                min="1"
-                max="20"
-                step="0.1"
-                value={loan.rate}
-                onChange={(event) => setLoan((current) => ({ ...current, rate: Number(event.target.value) }))}
-              />
+              <span>Interest %</span>
+              <input onChange={(e) => setLoan((c) => ({ ...c, rate: Number(e.target.value) }))} type="number" value={loan.rate} />
+              <input className="tool-slider" type="range" min="1" max="20" step="0.1" value={loan.rate} onChange={(e) => setLoan((c) => ({ ...c, rate: Number(e.target.value) }))} />
             </label>
             <label className="field">
               <span>Years</span>
-              <input
-                onChange={(event) => setLoan((current) => ({ ...current, years: Number(event.target.value) }))}
-                type="number"
-                value={loan.years}
-              />
-              <input
-                className="tool-slider"
-                type="range"
-                min="1"
-                max="40"
-                step="1"
-                value={loan.years}
-                onChange={(event) => setLoan((current) => ({ ...current, years: Number(event.target.value) }))}
-              />
+              <input onChange={(e) => setLoan((c) => ({ ...c, years: Number(e.target.value) }))} type="number" value={loan.years} />
+              <input className="tool-slider" type="range" min="1" max="40" step="1" value={loan.years} onChange={(e) => setLoan((c) => ({ ...c, years: Number(e.target.value) }))} />
             </label>
           </div>
-          <div className="result-card">Estimated EMI: Rs {Math.round(emi).toLocaleString("en-IN")} / month</div>
+          <div className="result-card">EMI: ₹{Math.round(emi).toLocaleString("en-IN")} / month</div>
         </article>
       </section>
     </div>

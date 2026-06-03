@@ -23,22 +23,20 @@ export default function MeetingLogList({ logs, user, filters, onFilterChange, on
           <div className="section-kicker">History</div>
           <h3>All meetings</h3>
         </div>
-        <span className="mono-chip">{logs.length} records</span>
+        <span className="mono-chip">{logs.length}</span>
       </div>
 
       <div className="filter-bar">
         <input
           value={filters.query}
           onChange={(event) => onFilterChange("query", event.target.value)}
-          placeholder="Search client, location, notes, or staff..."
+          placeholder="Search..."
         />
         {user.role === "owner" ? (
           <select value={filters.staff} onChange={(event) => onFilterChange("staff", event.target.value)}>
             <option value="">All staff</option>
             {staffNames.map((name) => (
-              <option key={name} value={name}>
-                {name}
-              </option>
+              <option key={name} value={name}>{name}</option>
             ))}
           </select>
         ) : null}
@@ -47,7 +45,6 @@ export default function MeetingLogList({ logs, user, filters, onFilterChange, on
       {logs.length === 0 ? (
         <div className="empty-state">
           <h4>No records found</h4>
-          <p>Logs will appear here once meetings are recorded, or try a different search.</p>
         </div>
       ) : (
         <div className="log-list">
@@ -67,27 +64,15 @@ export default function MeetingLogList({ logs, user, filters, onFilterChange, on
                       ) : null}
                     </div>
                     <div className="log-record-meta">
-                      {log.staffName} . {log.location} . {formatDate(log.createdAt)}
+                      {log.staffName} · {log.location} · {formatDate(log.createdAt)}
                     </div>
                   </div>
 
                   <div className="action-row">
-                    <button
-                      className="icon-btn"
-                      onClick={() => onUpdate(log)}
-                      title="Edit log"
-                      aria-label="Edit log"
-                      disabled={deleting}
-                    >
+                    <button className="icon-btn" onClick={() => onUpdate(log)} title="Edit" disabled={deleting}>
                       <Pencil size={13} />
                     </button>
-                    <button
-                      className="icon-btn danger"
-                      onClick={() => handleDelete(log._id)}
-                      title="Delete log"
-                      aria-label="Delete log"
-                      disabled={deleting}
-                    >
+                    <button className="icon-btn danger" onClick={() => handleDelete(log._id)} title="Delete" disabled={deleting}>
                       <Trash2 size={13} />
                     </button>
                   </div>
@@ -97,11 +82,11 @@ export default function MeetingLogList({ logs, user, filters, onFilterChange, on
 
                 <div className="log-record-footer">
                   <span className="pill muted">{log.meetingType || "review"}</span>
-                  {log.outcome ? <span>Outcome: {log.outcome}</span> : null}
+                  {log.outcome ? <span>{log.outcome}</span> : null}
                   {log.followUpSummary ? (
                     <span>
-                      Follow-up: {log.followUpSummary}
-                      {log.followUpDate ? ` . ${formatDateOnly(log.followUpDate)}` : ""}
+                      ↳ {log.followUpSummary}
+                      {log.followUpDate ? ` · ${formatDateOnly(log.followUpDate)}` : ""}
                     </span>
                   ) : null}
                 </div>

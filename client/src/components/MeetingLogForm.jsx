@@ -26,7 +26,7 @@ export default function MeetingLogForm({ onCreate }) {
       await onCreate({ ...form, followUpDate: form.followUpDate || undefined });
       setForm(INIT);
     } catch (err) {
-      setError(err.message || "Unable to create the meeting log.");
+      setError(err.message || "Unable to create log.");
     } finally {
       setBusy(false);
     }
@@ -39,7 +39,7 @@ export default function MeetingLogForm({ onCreate }) {
 
       <form className="meeting-form" onSubmit={handleSubmit}>
         <div className="field">
-          <span>Client name</span>
+          <span>Client</span>
           <input value={form.clientName} onChange={set("clientName")} placeholder="Rakesh Sharma" required />
         </div>
 
@@ -50,7 +50,7 @@ export default function MeetingLogForm({ onCreate }) {
 
         <div className="form-split-grid">
           <div className="field">
-            <span>Meeting type</span>
+            <span>Type</span>
             <select value={form.meetingType} onChange={set("meetingType")}>
               <option value="review">Review</option>
               <option value="prospect">Prospect</option>
@@ -73,8 +73,8 @@ export default function MeetingLogForm({ onCreate }) {
           <textarea
             value={form.notes}
             onChange={set("notes")}
-            placeholder="Goals, objections, promised actions, next steps..."
-            rows={5}
+            placeholder="Goals, objections, next steps..."
+            rows={4}
             required
           />
         </div>
@@ -97,9 +97,9 @@ export default function MeetingLogForm({ onCreate }) {
         {error ? <div className="inline-error">{error}</div> : null}
 
         <div className="form-actions">
-          <span className="form-note">Ctrl + Enter to submit</span>
+          <span className="form-note">Ctrl+Enter</span>
           <button disabled={busy} type="submit">
-            {busy ? "Saving..." : "Create log ->"}
+            {busy ? "Saving..." : "Create log →"}
           </button>
         </div>
       </form>

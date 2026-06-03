@@ -43,7 +43,7 @@ export default function LogEditModal({ log, onClose, onSave }) {
     try {
       await onSave(log, { ...form, followUpDate: form.followUpDate || undefined });
     } catch (err) {
-      setError(err.message || "Unable to save the log.");
+      setError(err.message || "Unable to save.");
     } finally {
       setBusy(false);
     }
@@ -54,8 +54,8 @@ export default function LogEditModal({ log, onClose, onSave }) {
       <div className="dialog-shell" onClick={(event) => event.stopPropagation()} role="dialog" aria-modal aria-label="Edit meeting log">
         <div className="dialog-header">
           <div>
-            <div className="section-kicker">Editing</div>
-            <h3>Update meeting record</h3>
+            <div className="section-kicker">Edit log</div>
+            <h3>Update meeting</h3>
           </div>
           <button className="icon-btn" onClick={onClose} aria-label="Close">
             <X size={14} />
@@ -65,7 +65,7 @@ export default function LogEditModal({ log, onClose, onSave }) {
         <form className="stack" onSubmit={handleSubmit}>
           <div className="form-split-grid">
             <div className="field">
-              <span>Client name</span>
+              <span>Client</span>
               <input value={form.clientName} onChange={set("clientName")} required />
             </div>
             <div className="field">
@@ -76,7 +76,7 @@ export default function LogEditModal({ log, onClose, onSave }) {
 
           <div className="form-split-grid">
             <div className="field">
-              <span>Meeting type</span>
+              <span>Type</span>
               <select value={form.meetingType} onChange={set("meetingType")}>
                 <option value="review">Review</option>
                 <option value="prospect">Prospect</option>
@@ -95,8 +95,8 @@ export default function LogEditModal({ log, onClose, onSave }) {
           </div>
 
           <div className="field">
-            <span>Advisory notes</span>
-            <textarea value={form.notes} onChange={set("notes")} rows={6} required />
+            <span>Notes</span>
+            <textarea value={form.notes} onChange={set("notes")} rows={5} required />
           </div>
 
           <div className="form-split-grid">
@@ -118,11 +118,9 @@ export default function LogEditModal({ log, onClose, onSave }) {
           {error ? <div className="inline-error">{error}</div> : null}
 
           <div className="dialog-actions">
-            <button type="button" className="btn btn-secondary" onClick={onClose}>
-              Cancel
-            </button>
+            <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
             <button type="submit" className="btn btn-primary" disabled={busy}>
-              {busy ? "Saving..." : "Save changes"}
+              {busy ? "Saving..." : "Save"}
             </button>
           </div>
         </form>

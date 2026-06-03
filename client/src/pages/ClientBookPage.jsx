@@ -9,22 +9,9 @@ export default function ClientBookPage({ clients, tasks, onOpenImport }) {
   const filteredClients = useMemo(() => {
     const needle = query.trim().toLowerCase();
     if (!needle) return clients;
-
     return clients.filter((client) =>
-      [
-        client.primaryHolderName,
-        client.clientCode,
-        client.city,
-        client.email,
-        client.mobile,
-        client.familyName,
-        client.notes,
-        client.nextAction,
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase()
-        .includes(needle)
+      [client.primaryHolderName, client.clientCode, client.city, client.email, client.mobile, client.familyName, client.notes, client.nextAction]
+        .filter(Boolean).join(" ").toLowerCase().includes(needle)
     );
   }, [clients, query]);
 
@@ -34,13 +21,10 @@ export default function ClientBookPage({ clients, tasks, onOpenImport }) {
         <div>
           <div className="section-kicker">Clients</div>
           <h3>Client book</h3>
-          <p>
-            Every client profile is searchable, editable, and linked to follow-ups, portfolio data, and meeting history.
-          </p>
         </div>
         <button className="btn btn-primary" onClick={onOpenImport}>
           <Plus size={14} />
-          Bulk import clients
+          Import
         </button>
       </section>
 
@@ -48,7 +32,7 @@ export default function ClientBookPage({ clients, tasks, onOpenImport }) {
         <div className="filter-bar single-filter-bar">
           <input
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search client, code, family, city, email, notes, or mobile"
+            placeholder="Search by name, code, city, email..."
             value={query}
           />
         </div>
@@ -66,7 +50,7 @@ export default function ClientBookPage({ clients, tasks, onOpenImport }) {
                 <div className="client-card-topline">
                   <div>
                     <h4>{client.primaryHolderName}</h4>
-                    <p>{client.city || "Location pending"}</p>
+                    <p>{client.city || "—"}</p>
                   </div>
                   <span className="status-pill status-neutral">
                     {client.relationshipStatus || "active"}
@@ -75,27 +59,28 @@ export default function ClientBookPage({ clients, tasks, onOpenImport }) {
 
                 <div className="client-card-meta">
                   <div>
-                    <span>Meeting count</span>
+                    <span>Meetings</span>
                     <strong>{client.meetingCount || 0}</strong>
                   </div>
                   <div>
-                    <span>Open follow-ups</span>
+                    <span>Tasks</span>
                     <strong>{clientOpenTasks}</strong>
                   </div>
                   <div>
-                    <span>Last meeting</span>
-                    <strong>{client.lastMeetingAt ? formatDateOnly(client.lastMeetingAt) : "Not set"}</strong>
+                    <span>Last met</span>
+                    <strong>{client.lastMeetingAt ? formatDateOnly(client.lastMeetingAt) : "—"}</strong>
                   </div>
                 </div>
 
-                <p>{client.nextAction || client.latestNotes || "Open the workspace to add relationship context and next actions."}</p>
+                {(client.nextAction || client.latestNotes) && (
+                  <p>{client.nextAction || client.latestNotes}</p>
+                )}
               </Link>
             );
           })
         ) : (
           <section className="workspace-card empty-card-pro">
-            <h4>No client records yet</h4>
-            <p>Meeting logs will start shaping this relationship book automatically.</p>
+            <h4>No clients yet</h4>
           </section>
         )}
       </section>

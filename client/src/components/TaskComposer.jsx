@@ -25,7 +25,7 @@ export function TaskComposer({ clientId, onCreate, compact = false }) {
       });
       setForm(INIT);
     } catch (err) {
-      setError(err.message || "Unable to create the follow-up.");
+      setError(err.message || "Unable to create follow-up.");
     } finally {
       setBusy(false);
     }
@@ -35,11 +35,11 @@ export function TaskComposer({ clientId, onCreate, compact = false }) {
     <form className={`task-composer${compact ? " compact" : ""}`} onSubmit={handleSubmit}>
       <div className="task-composer-grid">
         <div className="field">
-          <span>Follow-up title</span>
-          <input value={form.title} onChange={set("title")} placeholder="Call client about SIP step-up" required />
+          <span>Title</span>
+          <input value={form.title} onChange={set("title")} placeholder="Follow-up task" required />
         </div>
         <div className="field">
-          <span>Due date</span>
+          <span>Due</span>
           <input type="date" value={form.dueDate} onChange={set("dueDate")} />
         </div>
         <div className="field">
@@ -56,14 +56,14 @@ export function TaskComposer({ clientId, onCreate, compact = false }) {
         <textarea
           value={form.details}
           onChange={set("details")}
-          placeholder="Context, promised action, or reminder notes..."
+          placeholder="Notes..."
           rows={2}
         />
       </div>
       {error ? <div className="inline-error">{error}</div> : null}
       <div className="task-composer-actions">
         <button disabled={busy} type="submit">
-          {busy ? "Creating..." : "Add follow-up ->"}
+          {busy ? "Creating..." : "Add follow-up →"}
         </button>
       </div>
     </form>
@@ -136,7 +136,6 @@ export function TaskList({
                   className="icon-btn"
                   onClick={() => handleToggle(task, done ? "open" : "done")}
                   title={done ? "Reopen" : "Mark done"}
-                  aria-label={done ? "Reopen task" : "Mark task done"}
                   disabled={loading}
                 >
                   {done ? <RotateCcw size={12} /> : <Check size={12} />}
@@ -144,8 +143,7 @@ export function TaskList({
                 <button
                   className="icon-btn danger"
                   onClick={() => handleDelete(task._id)}
-                  title="Delete task"
-                  aria-label="Delete task"
+                  title="Delete"
                   disabled={loading}
                 >
                   <Trash2 size={12} />

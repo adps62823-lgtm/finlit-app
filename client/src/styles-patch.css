@@ -1,0 +1,51 @@
+/* ============================================================
+   APPLY THESE PATCHES TO client/src/styles.css
+   ============================================================ */
+
+/* 1. Remove the workspace badge entirely */
+.workspace-badge {
+  display: none;
+}
+
+/* 2. Hide topbar subtitle on all screens (not just mobile) */
+.workspace-topbar p {
+  display: none;
+}
+
+/* 3. Shrink topbar vertical padding */
+/* Change existing rule from:
+   .workspace-topbar { padding: 22px 30px; }
+   to: */
+.workspace-topbar {
+  padding: 14px 24px;
+}
+
+/* 4. Tighten topbar title */
+/* Change existing rule from:
+   .workspace-topbar h1 { font-size: 24px; margin-top: 4px; }
+   to: */
+.workspace-topbar h1 {
+  font-size: 20px;
+  margin-top: 0;
+}
+
+/* 5. Tighten page content padding */
+/* Change existing rule from:
+   .workspace-page { padding: 26px 30px 110px; }
+   to: */
+.workspace-page {
+  padding: 18px 24px 100px;
+}
+
+/* 6. Hide topbar kicker (the small label above the title) */
+.topbar-kicker {
+  display: none;
+}
+
+/* 7. Reduce sidebar gap */
+/* Change existing rule from:
+   .workspace-sidebar { gap: 18px; }
+   to: */
+.workspace-sidebar {
+  gap: 14px;
+}

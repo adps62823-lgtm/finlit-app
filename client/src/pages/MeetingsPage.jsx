@@ -25,12 +25,11 @@ export default function MeetingsPage({
         <div>
           <div className="section-kicker">Meetings</div>
           <h3>Meeting register</h3>
-          <p>Record field conversations, lock the follow-up, and keep context tied to the client book.</p>
         </div>
         <button
           className="btn btn-primary meetings-fab-trigger"
           onClick={() => setFormOpen((value) => !value)}
-          aria-label={formOpen ? "Close form" : "Log a new meeting"}
+          aria-label={formOpen ? "Close form" : "Log a meeting"}
         >
           {formOpen ? <X size={15} /> : <Plus size={15} />}
           {formOpen ? "Close" : "New log"}

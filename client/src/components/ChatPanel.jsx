@@ -19,7 +19,7 @@ export default function ChatPanel({ messages, onSend }) {
       setText("");
       setFile(null);
     } catch (err) {
-      setError(err.message || "Failed to send message.");
+      setError(err.message || "Failed to send.");
     } finally {
       setBusy(false);
     }
@@ -28,18 +28,11 @@ export default function ChatPanel({ messages, onSend }) {
   return (
     <section className="workspace-card chat-panel">
       <div className="section-kicker">Team channel</div>
-      <div className="section-heading-row">
-        <div>
-          <h3>Realtime collaboration room</h3>
-          <p>Use this for handoffs, internal questions, and file drops without leaving the page.</p>
-        </div>
-      </div>
 
       <div className="chat-stream">
         {messages.length === 0 ? (
           <div className="empty-state">
             <h4>No messages yet</h4>
-            <p>The first internal note or file will appear here.</p>
           </div>
         ) : null}
 
@@ -63,8 +56,8 @@ export default function ChatPanel({ messages, onSend }) {
         <textarea
           value={text}
           onChange={(event) => setText(event.target.value)}
-          placeholder="Share a client update, task handoff, or internal note."
-          rows="4"
+          placeholder="Message the team..."
+          rows="3"
         />
 
         {error ? <div className="inline-error">{error}</div> : null}
@@ -72,12 +65,12 @@ export default function ChatPanel({ messages, onSend }) {
         <div className="chat-composer-footer">
           <label className="file-pill">
             <Paperclip size={14} />
-            <span>{file ? file.name : "Attach document, audio, image, or video"}</span>
+            <span>{file ? file.name : "Attach file"}</span>
             <input onChange={(event) => setFile(event.target.files?.[0] || null)} type="file" />
           </label>
-          <button disabled={busy} type="submit" className="btn btn-primary">
+          <button disabled={busy} type="submit" className="btn btn-primary btn-sm">
             <Send size={14} />
-            {busy ? "Sending..." : "Send to Team Channel"}
+            {busy ? "..." : "Send"}
           </button>
         </div>
       </form>

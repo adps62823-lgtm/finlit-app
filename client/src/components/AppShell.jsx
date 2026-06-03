@@ -19,34 +19,19 @@ import {
 import { NavLink, useLocation } from "react-router-dom";
 
 const NAV = [
-  { to: "/app/command", label: "Command Center", Icon: LayoutDashboard },
-  { to: "/app/clients", label: "Client Book", Icon: Users },
-  { to: "/app/meetings", label: "Meeting Desk", Icon: BookOpen },
+  { to: "/app/command", label: "Command", Icon: LayoutDashboard },
+  { to: "/app/clients", label: "Clients", Icon: Users },
+  { to: "/app/meetings", label: "Meetings", Icon: BookOpen },
   { to: "/app/transactions", label: "Transactions", Icon: ShieldCheck },
-  { to: "/app/research", label: "Research Lab", Icon: BriefcaseBusiness },
+  { to: "/app/research", label: "Research", Icon: BriefcaseBusiness },
 ];
 
 const TITLES = {
-  "/app/command": {
-    label: "Command Center",
-    subtitle: "Daily pulse, staff coverage, and urgent follow-ups.",
-  },
-  "/app/clients": {
-    label: "Client Book",
-    subtitle: "Portfolio-aware client profiles and bulk client import.",
-  },
-  "/app/meetings": {
-    label: "Meeting Desk",
-    subtitle: "Field logs, handoffs, and follow-up capture.",
-  },
-  "/app/transactions": {
-    label: "Transactions",
-    subtitle: "AdvisorX-style workflow rail for future integrations.",
-  },
-  "/app/research": {
-    label: "Research Lab",
-    subtitle: "Planning tools, calculators, and market surfaces.",
-  },
+  "/app/command": { label: "Command Center" },
+  "/app/clients": { label: "Client Book" },
+  "/app/meetings": { label: "Meeting Desk" },
+  "/app/transactions": { label: "Transactions" },
+  "/app/research": { label: "Research Lab" },
 };
 
 function StatChip({ label, value }) {
@@ -91,16 +76,16 @@ export default function AppShell({
         <div className="sidebar-brand">
           <div className="brand-mark">F</div>
           <div>
-            <strong>Finlit Command</strong>
-            <span>Advisor operations desk</span>
+            <strong>Finlit</strong>
+            <span>Advisor ops</span>
           </div>
         </div>
 
         <div className="sidebar-user-card">
           <div className="sidebar-avatar">{initials}</div>
           <div className="sidebar-user-copy">
-            <strong>{user?.name || "Principal Advisor"}</strong>
-            <span>{user?.role === "owner" ? "Owner console" : "Staff workspace"}</span>
+            <strong>{user?.name || "Advisor"}</strong>
+            <span>{user?.role === "owner" ? "Owner" : "Staff"}</span>
           </div>
         </div>
 
@@ -120,7 +105,7 @@ export default function AppShell({
         </nav>
 
         <div className="sidebar-rail-card">
-          <div className="rail-card-title">Today at a glance</div>
+          <div className="rail-card-title">At a glance</div>
           <div className="rail-stats">
             <StatChip label="Logs" value={stats.totalLogs} />
             <StatChip label="Clients" value={stats.uniqueClients} />
@@ -144,7 +129,7 @@ export default function AppShell({
               ))}
             </div>
           ) : (
-            <p className="rail-empty">No due reminders right now.</p>
+            <p className="rail-empty">No due reminders.</p>
           )}
 
           {onEnableNotifications && !notificationsEnabled ? (
@@ -162,7 +147,7 @@ export default function AppShell({
           </button>
           <button className="btn btn-primary btn-sm" onClick={onOpenImport}>
             <CirclePlus size={14} />
-            Import clients
+            Import
           </button>
         </div>
 
@@ -178,18 +163,14 @@ export default function AppShell({
             <button className="topbar-menu" onClick={() => setMobileOpen((value) => !value)}>
               {mobileOpen ? <X size={18} /> : <Menu size={18} />}
             </button>
-            <div>
-              <div className="topbar-kicker">Finlit internal platform</div>
-              <h1>{activeTitle.label}</h1>
-              <p>{activeTitle.subtitle}</p>
-            </div>
+            <h1>{activeTitle.label}</h1>
           </div>
 
           <div className="topbar-right">
             <button className="topbar-search" onClick={onOpenSearch}>
               <Search size={15} />
-              <span>Search everything</span>
-              <kbd>Ctrl K</kbd>
+              <span>Search</span>
+              <kbd>⌘K</kbd>
             </button>
 
             <button className="icon-btn" onClick={onOpenImport} title="Import clients">
@@ -199,22 +180,18 @@ export default function AppShell({
             <button
               className="icon-btn"
               onClick={onToggleTheme}
-              title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+              title={theme === "dark" ? "Light mode" : "Dark mode"}
             >
               {theme === "dark" ? <SunMedium size={15} /> : <MoonStar size={15} />}
             </button>
 
-            <button className="icon-btn" onClick={onEnableNotifications} title="Enable browser alerts">
+            <button className="icon-btn" onClick={onEnableNotifications} title="Alerts">
               <BellRing size={15} />
             </button>
           </div>
         </header>
 
         <main className="workspace-page">
-          <div className="workspace-badge">
-            <Sparkles size={14} />
-            Built for advisory operations, field follow-up, and owner visibility.
-          </div>
           {children}
         </main>
       </div>

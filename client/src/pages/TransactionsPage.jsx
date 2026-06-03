@@ -3,26 +3,28 @@ import React from "react";
 export default function TransactionsPage() {
   return (
     <div className="page-stack">
-      <section className="surface-card surface-card-hero">
-        <div className="panel-kicker">Orders</div>
-        <h3>Transactions</h3>
+      <section className="workspace-card page-hero">
+        <div>
+          <div className="section-kicker">Transactions</div>
+          <h3>Transaction rail</h3>
+        </div>
       </section>
 
       <section className="two-column-grid">
         <article className="surface-card">
-          <h4>Future control tower</h4>
+          <h4>Planned features</h4>
           <div className="insight-stack">
             <div>
-              <strong>Purchase and SIP desk</strong>
-              <p>Draft, validate, submit, and track investor orders with maker-checker visibility.</p>
+              <strong>Purchase & SIP desk</strong>
+              <p>Draft, validate, and track investor orders with maker-checker visibility.</p>
             </div>
             <div>
               <strong>Mandate lifecycle</strong>
-              <p>Monitor OTM and eMandate states, approvals, bank failures, and retry queues.</p>
+              <p>OTM and eMandate states, approvals, and retry queues.</p>
             </div>
             <div>
               <strong>Exception management</strong>
-              <p>Keep rejected transactions, missing KYC, NACH errors, and stale forms in one queue.</p>
+              <p>Rejected transactions, KYC gaps, and NACH errors in one queue.</p>
             </div>
           </div>
         </article>
@@ -32,15 +34,15 @@ export default function TransactionsPage() {
           <div className="roadmap-grid single-column-grid">
             <div>
               <strong>No live order execution</strong>
-              <p>Real transactions require BSE StAR MF, MFU, or another approved rail plus credentials.</p>
+              <p>Requires BSE StAR MF, MFU, or an approved rail + credentials.</p>
             </div>
             <div>
-              <strong>No holdings feed yet</strong>
-              <p>Transaction history and post-trade truth need registrar, CAMS, KFintech, or RTA-backed data sync.</p>
+              <strong>No holdings feed</strong>
+              <p>Needs CAMS, KFintech, or RTA data sync.</p>
             </div>
             <div>
-              <strong>No workflow controls yet</strong>
-              <p>Transaction approval rules, audit logs, and compliance checkpoints still need to be built.</p>
+              <strong>No workflow controls</strong>
+              <p>Approval rules and audit logs still to be built.</p>
             </div>
           </div>
         </article>
