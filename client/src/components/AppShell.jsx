@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import {
   BellRing,
   BookOpen,
@@ -12,26 +12,32 @@ import {
   ShieldCheck,
   Sparkles,
   SunMedium,
+  Wallet,
   Users,
   X,
   MoonStar,
+  ListTodo,
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 
 const NAV = [
   { to: "/app/command", label: "Command", Icon: LayoutDashboard },
   { to: "/app/clients", label: "Clients", Icon: Users },
+  { to: "/app/portfolio", label: "Portfolio", Icon: Wallet },
   { to: "/app/meetings", label: "Meetings", Icon: BookOpen },
   { to: "/app/transactions", label: "Transactions", Icon: ShieldCheck },
+  { to: "/app/tasks", label: "Tasks", Icon: ListTodo },
   { to: "/app/research", label: "Research", Icon: BriefcaseBusiness },
 ];
 
 const TITLES = {
-  "/app/command": { label: "Command Center" },
-  "/app/clients": { label: "Client Book" },
-  "/app/meetings": { label: "Meeting Desk" },
-  "/app/transactions": { label: "Transactions" },
-  "/app/research": { label: "Research Lab" },
+  "/app/command": { label: "Overview" },
+  "/app/clients": { label: "Clients" },
+  "/app/portfolio": { label: "Portfolio" },
+  "/app/meetings": { label: "Meetings" },
+  "/app/transactions": { label: "Orders" },
+  "/app/tasks": { label: "Tasks" },
+  "/app/research": { label: "Tools" },
 };
 
 function StatChip({ label, value }) {
@@ -57,7 +63,7 @@ export default function AppShell({
   children,
 }) {
   const location = useLocation();
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(true);
 
   const activeTitle = Object.entries(TITLES).find(([path]) =>
     location.pathname === path || location.pathname.startsWith(`${path}/`)
@@ -71,14 +77,18 @@ export default function AppShell({
     .toUpperCase();
 
   return (
-    <div className="workspace-shell">
-      <aside className={`workspace-sidebar${mobileOpen ? " open" : ""}`}>
+    <div className={`workspace-shell${drawerOpen ? "" : " sidebar-collapsed"}`}>
+      <aside className={`workspace-sidebar${drawerOpen ? " open" : ""}`}>
         <div className="sidebar-brand">
-          <div className="brand-mark">F</div>
-          <div>
-            <strong>Finlit</strong>
-            <span>Advisor ops</span>
+          <div className="sidebar-brand-copy">
+            <img src="/logo.png" alt="Finlit logo" className="auth-logo" />
+            <div>
+              <strong>Finlit Consultants</strong>
+            </div>
           </div>
+          <button className="icon-btn sidebar-drawer-close" type="button" onClick={() => setDrawerOpen(false)} aria-label="Close drawer">
+            <X size={18} />
+          </button>
         </div>
 
         <div className="sidebar-user-card">
@@ -95,7 +105,7 @@ export default function AppShell({
               key={to}
               to={to}
               className={({ isActive }) => `workspace-nav-link${isActive ? " active" : ""}`}
-              onClick={() => setMobileOpen(false)}
+              onClick={() => setDrawerOpen(false)}
             >
               <Icon size={16} />
               <span>{label}</span>
@@ -105,7 +115,7 @@ export default function AppShell({
         </nav>
 
         <div className="sidebar-rail-card">
-          <div className="rail-card-title">At a glance</div>
+          <div className="rail-card-title">Stats</div>
           <div className="rail-stats">
             <StatChip label="Logs" value={stats.totalLogs} />
             <StatChip label="Clients" value={stats.uniqueClients} />
@@ -115,7 +125,7 @@ export default function AppShell({
         </div>
 
         <div className="sidebar-rail-card">
-          <div className="rail-card-title">Reminders</div>
+          <div className="rail-card-title">Due</div>
           {dueTasks.length ? (
             <div className="reminder-list">
               {dueTasks.slice(0, 3).map((task) => (
@@ -133,65 +143,55 @@ export default function AppShell({
           )}
 
           {onEnableNotifications && !notificationsEnabled ? (
-            <button className="btn btn-secondary btn-sm rail-action" onClick={onEnableNotifications}>
+            <button className="btn btn-secondary btn-sm rail-action" onClick={onEnableNotifications} aria-label="Enable alerts">Enable alerts
               <BellRing size={14} />
-              Enable alerts
             </button>
           ) : null}
         </div>
-
-        <div className="sidebar-actions">
-          <button className="btn btn-secondary btn-sm" onClick={onOpenSearch}>
-            <Search size={14} />
-            Search
-          </button>
-          <button className="btn btn-primary btn-sm" onClick={onOpenImport}>
-            <CirclePlus size={14} />
-            Import
-          </button>
-        </div>
-
-        <button className="btn btn-ghost btn-sm logout-button" onClick={onLogout}>
+        <button className="btn btn-ghost btn-sm logout-button" onClick={onLogout} aria-label="Sign out">Log out
           <LogOut size={14} />
-          Sign out
         </button>
       </aside>
 
       <div className="workspace-main">
         <header className="workspace-topbar">
           <div className="topbar-left">
-            <button className="topbar-menu" onClick={() => setMobileOpen((value) => !value)}>
-              {mobileOpen ? <X size={18} /> : <Menu size={18} />}
+            <button className="topbar-menu" onClick={() => setDrawerOpen((value) => !value)} type="button" aria-label="Toggle drawer">
+              <Menu size={18} />
             </button>
             <h1>{activeTitle.label}</h1>
           </div>
 
           <div className="topbar-right">
-            <button className="topbar-search" onClick={onOpenSearch}>
+            <button className="icon-btn" onClick={onOpenSearch} title="Search" aria-label="Search" type="button">
               <Search size={15} />
-              <span>Search</span>
-              <kbd>⌘K</kbd>
             </button>
 
-            <button className="icon-btn" onClick={onOpenImport} title="Import clients">
+            <button className="icon-btn" onClick={onOpenImport} title="Import" aria-label="Import" type="button">
               <CirclePlus size={15} />
             </button>
 
             <button
               className="icon-btn"
               onClick={onToggleTheme}
-              title={theme === "dark" ? "Light mode" : "Dark mode"}
+              title={theme === "dark" ? "Light" : "Dark"}
+              aria-label="Toggle theme"
+              type="button"
             >
               {theme === "dark" ? <SunMedium size={15} /> : <MoonStar size={15} />}
             </button>
 
-            <button className="icon-btn" onClick={onEnableNotifications} title="Alerts">
+            <button className="icon-btn" onClick={onEnableNotifications} title="Alerts" aria-label="Alerts" type="button">
               <BellRing size={15} />
             </button>
           </div>
         </header>
 
         <main className="workspace-page">
+          <div className="workspace-badge">
+            <Sparkles size={14} />
+            Ops mode
+          </div>
           {children}
         </main>
       </div>
@@ -202,13 +202,13 @@ export default function AppShell({
             key={to}
             to={to}
             className={({ isActive }) => `mobile-nav-link${isActive ? " active" : ""}`}
-            onClick={() => setMobileOpen(false)}
+            onClick={() => setDrawerOpen(true)}
           >
             <Icon size={18} />
             <span>{label.split(" ")[0]}</span>
           </NavLink>
         ))}
-        <button className="mobile-nav-link" onClick={onOpenSearch}>
+        <button className="mobile-nav-link mobile-nav-link-more" onClick={onOpenSearch} type="button" aria-label="Search">
           <Search size={18} />
           <span>Search</span>
         </button>

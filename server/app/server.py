@@ -9,7 +9,9 @@ from app.routes.auth import router as auth_router
 from app.routes.chat import router as chat_router
 from app.routes.clients import router as clients_router
 from app.routes.dashboard import router as dashboard_router
+from app.routes.aum import router as aum_router
 from app.routes.logs import router as logs_router
+from app.routes.users import router as users_router
 from app.routes.tasks import router as tasks_router
 from app.routes.transactions import router as transactions_router
 from app.routes.uploads import router as uploads_router
@@ -31,7 +33,9 @@ sio.eio.cors_allowed_origins = ["*"]
 api.include_router(auth_router)
 api.include_router(clients_router)
 api.include_router(dashboard_router)
+api.include_router(aum_router)
 api.include_router(logs_router)
+api.include_router(users_router)
 api.include_router(tasks_router)
 api.include_router(chat_router)
 api.include_router(transactions_router)

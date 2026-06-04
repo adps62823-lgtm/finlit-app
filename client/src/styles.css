@@ -74,6 +74,8 @@ body {
   margin: 0;
   min-height: 100vh;
   font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.65;
   background:
     radial-gradient(circle at top left, rgba(15, 118, 110, 0.08), transparent 25%),
     radial-gradient(circle at bottom right, rgba(59, 91, 220, 0.08), transparent 22%),
@@ -148,6 +150,20 @@ p {
   min-height: 100vh;
 }
 
+.workspace-shell.sidebar-collapsed .workspace-sidebar {
+  width: 0;
+  flex-basis: 0;
+  padding: 0;
+  border-right: none;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.workspace-shell.sidebar-collapsed .workspace-main {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
 .workspace-sidebar {
   width: 320px;
   flex: 0 0 320px;
@@ -163,6 +179,7 @@ p {
   flex-direction: column;
   gap: 18px;
 }
+
 
 .workspace-main {
   flex: 1;
@@ -190,10 +207,10 @@ p {
 }
 
 .workspace-page {
-  padding: 26px 30px 110px;
+  padding: 28px 32px 120px;
   display: flex;
   flex-direction: column;
-  gap: 22px;
+  gap: 26px;
 }
 
 .workspace-badge {
@@ -254,11 +271,21 @@ p {
 }
 
 .sidebar-brand {
+  position: relative;
   border-radius: var(--radius-lg);
-  padding: 18px;
+  padding: 18px 64px 18px 18px;
   display: flex;
+  justify-content: space-between;
   gap: 14px;
   align-items: center;
+}
+
+.sidebar-brand-copy {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  flex: 1;
 }
 
 .brand-mark {
@@ -279,6 +306,12 @@ p {
   font-size: 15px;
 }
 
+.sidebar-drawer-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+}
+
 .sidebar-brand span,
 .sidebar-user-copy span,
 .rail-card-title,
@@ -290,6 +323,10 @@ p {
   text-transform: uppercase;
 }
 
+.rail-action:hover{
+  color: var(--accent);
+}
+  
 .sidebar-user-card,
 .sidebar-rail-card {
   border-radius: var(--radius-lg);
@@ -424,6 +461,10 @@ p {
   justify-content: center;
 }
 
+.logout-button:hover {
+  color: var(--red);
+}
+
 .workspace-topbar h1 {
   font-size: 24px;
   margin-top: 4px;
@@ -443,7 +484,8 @@ p {
 }
 
 .topbar-menu {
-  display: none;
+  display: grid;
+  place-items: center;
   width: 42px;
   height: 42px;
   border-radius: 14px;
@@ -453,10 +495,12 @@ p {
 }
 
 .topbar-right {
-  display: flex;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 42px;
+  justify-content: end;
   align-items: center;
   gap: 10px;
-  flex-wrap: wrap;
 }
 
 .topbar-search {
@@ -558,10 +602,20 @@ p {
   transform: none;
 }
 
+.spin {
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .workspace-page .page-stack,
 .page-stack {
   display: grid;
-  gap: 22px;
+  gap: 26px;
 }
 
 .workspace-card,
@@ -573,7 +627,7 @@ p {
 .chat-panel,
 .summary-stat-card {
   border-radius: var(--radius-xl);
-  padding: 22px;
+  padding: 24px;
 }
 
 .metric-card {
@@ -590,7 +644,7 @@ p {
 .timeline-meta-line,
 .mono-chip {
   color: var(--text-3);
-  font-size: 12px;
+  font-size: 12.5px;
 }
 
 .metric-card strong {
@@ -1075,6 +1129,18 @@ p {
   font-size: 12px;
 }
 
+.timeline-copy p,
+.chat-message-body,
+.search-result p,
+.dialog-note,
+.log-record-notes,
+.task-card-details,
+.client-card-pro p,
+.quiet-client-card p,
+.staff-board-item p {
+  line-height: 1.75;
+}
+
 .follow-up-inline {
   margin-top: 10px;
   padding: 10px 12px;
@@ -1138,6 +1204,7 @@ p {
 }
 
 .meetings-fab-trigger {
+  display: none;
   white-space: nowrap;
 }
 
@@ -1181,7 +1248,7 @@ p {
 }
 
 .page-hero h3 {
-  font-size: 28px;
+  font-size: 30px;
   margin-bottom: 8px;
 }
 
@@ -1255,7 +1322,7 @@ p {
 }
 
 .auth-heading h2 {
-  font-size: 34px;
+  font-size: 36px;
   letter-spacing: -0.04em;
 }
 
@@ -1374,6 +1441,70 @@ p {
   gap: 10px;
 }
 
+.filter-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-weight: 700;
+}
+
+.filter-chip strong {
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+.filter-chip.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: rgba(15, 118, 110, 0.24);
+}
+
+.collection-dialog {
+  width: min(980px, 100%);
+}
+
+.collection-modal-body {
+  display: grid;
+  gap: 12px;
+}
+
+.collection-modal-list {
+  display: grid;
+  gap: 10px;
+}
+
+.task-assignment-form {
+  display: grid;
+  gap: 16px;
+}
+
+.task-assignment-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.task-card-link {
+  display: grid;
+  gap: 10px;
+}
+
+.task-card-link:hover {
+  color: inherit;
+}
+
 .search-result {
   width: 100%;
   text-align: left;
@@ -1471,9 +1602,31 @@ p {
 }
 
 .chat-drawer-panel {
+  position: relative;
   max-height: inherit;
   overflow: auto;
   border-radius: 28px;
+  padding-top: 16px;
+}
+
+.chat-drawer-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  transition: background 160ms ease;
+  z-index: 2;
+}
+
+.chat-drawer-close:hover {
+  background: var(--surface-2);
 }
 
 .chat-panel {
@@ -1592,6 +1745,10 @@ p {
   .meetings-form-col.meetings-form-col--open {
     display: block;
   }
+
+  .meetings-fab-trigger {
+    display: inline-flex;
+  }
 }
 
 @media (max-width: 920px) {
@@ -1610,6 +1767,19 @@ p {
 
   .workspace-sidebar.open {
     transform: translateX(0);
+  }
+
+  .workspace-shell.sidebar-collapsed .workspace-sidebar {
+    width: 320px;
+    flex-basis: 320px;
+    padding: 20px;
+    border-right: 1px solid var(--border);
+    overflow: auto;
+    pointer-events: auto;
+  }
+
+  .workspace-shell.sidebar-collapsed .workspace-sidebar:not(.open) {
+    transform: translateX(-102%);
   }
 
   .workspace-topbar {
@@ -1636,6 +1806,7 @@ p {
   .two-column-grid,
   .profile-grid,
   .form-split-grid,
+  .task-assignment-grid,
   .task-composer-grid,
   .client-summary-grid,
   .meetings-page-grid {
@@ -1668,13 +1839,17 @@ p {
     background: rgba(11, 16, 32, 0.84);
   }
 
-  .mobile-nav-link {
-    justify-content: center;
-    flex-direction: column;
-    gap: 6px;
-    padding: 10px 8px;
-    font-size: 11px;
-  }
+.mobile-nav-link {
+  justify-content: center;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 8px;
+  font-size: 11px;
+}
+
+.mobile-nav-link-more {
+  font-weight: 700;
+}
 
   .chat-drawer-shell {
     left: 12px;
@@ -1706,4 +1881,3 @@ p {
     padding: 12px;
   }
 }
-@import url("./typography-spacing.css");

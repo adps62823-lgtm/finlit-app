@@ -250,3 +250,9 @@ class OrderDraftOut(BaseModel):
     createdByUserId: ObjectIdStr
     createdAt: datetime
     updatedAt: datetime
+
+
+class OrderUpdate(BaseModel):
+    status: Optional[str] = None
+    externalRef: Optional[str] = None
+    remarks: Optional[str] = None

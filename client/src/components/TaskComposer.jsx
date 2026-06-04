@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Check, RotateCcw, Trash2 } from "lucide-react";
+import { Check, Plus, RotateCcw, Trash2 } from "lucide-react";
 import { formatDateOnly, isOverdue } from "../utils/format";
 
 const INIT = { title: "", details: "", dueDate: "", priority: "medium" };
@@ -36,7 +36,7 @@ export function TaskComposer({ clientId, onCreate, compact = false }) {
       <div className="task-composer-grid">
         <div className="field">
           <span>Title</span>
-          <input value={form.title} onChange={set("title")} placeholder="Follow-up task" required />
+          <input value={form.title} onChange={set("title")} placeholder="Follow-up" required />
         </div>
         <div className="field">
           <span>Due</span>
@@ -53,17 +53,12 @@ export function TaskComposer({ clientId, onCreate, compact = false }) {
       </div>
       <div className="field">
         <span>Details</span>
-        <textarea
-          value={form.details}
-          onChange={set("details")}
-          placeholder="Notes..."
-          rows={2}
-        />
+        <textarea value={form.details} onChange={set("details")} placeholder="Notes..." rows={2} />
       </div>
       {error ? <div className="inline-error">{error}</div> : null}
       <div className="task-composer-actions">
-        <button disabled={busy} type="submit">
-          {busy ? "Creating..." : "Add follow-up →"}
+        <button className="btn btn-primary btn-sm" disabled={busy} type="submit" aria-label="Add follow-up">
+          <Plus size={14} />
         </button>
       </div>
     </form>
@@ -75,7 +70,7 @@ export function TaskList({
   onToggleStatus,
   onDelete,
   showClient = false,
-  emptyText = "No follow-ups yet.",
+  emptyText = "No follow-ups.",
 }) {
   const [pendingId, setPendingId] = useState("");
 
@@ -119,7 +114,9 @@ export function TaskList({
                 <div className="task-card-title-row">
                   <strong>{task.title}</strong>
                   <span className={`priority-${task.priority}`}>{task.priority}</span>
+                  {task.taskType ? <span className="pill muted">{task.taskType.replace(/_/g, " ")}</span> : null}
                 </div>
+                {task.assignedToName ? <p className="task-client-name">To {task.assignedToName}</p> : null}
                 {showClient ? <p className="task-client-name">{task.clientName}</p> : null}
               </div>
               <span className={overdue ? "status-overdue" : "status-neutral"}>
@@ -130,22 +127,12 @@ export function TaskList({
             {task.details ? <p className="task-card-details">{task.details}</p> : null}
 
             <div className="task-card-footer">
-              <span>{task.dueDate ? `Due ${formatDateOnly(task.dueDate)}` : "No due date"}</span>
+              <span>{task.dueDate ? `Due ${formatDateOnly(task.dueDate)}` : "No date"}</span>
               <div className="action-row">
-                <button
-                  className="icon-btn"
-                  onClick={() => handleToggle(task, done ? "open" : "done")}
-                  title={done ? "Reopen" : "Mark done"}
-                  disabled={loading}
-                >
+                <button className="icon-btn" onClick={() => handleToggle(task, done ? "open" : "done")} title={done ? "Reopen" : "Done"} disabled={loading} type="button">
                   {done ? <RotateCcw size={12} /> : <Check size={12} />}
                 </button>
-                <button
-                  className="icon-btn danger"
-                  onClick={() => handleDelete(task._id)}
-                  title="Delete"
-                  disabled={loading}
-                >
+                <button className="icon-btn danger" onClick={() => handleDelete(task._id)} title="Delete" disabled={loading} type="button">
                   <Trash2 size={12} />
                 </button>
               </div>

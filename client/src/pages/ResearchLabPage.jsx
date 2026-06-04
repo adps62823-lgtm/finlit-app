@@ -22,10 +22,10 @@ export default function ResearchLabPage() {
     <div className="page-stack">
       <section className="two-column-grid">
         <article className="surface-card">
-          <div className="panel-kicker">SIP projection</div>
+          <div className="panel-kicker">SIP</div>
           <div className="tool-form-pro">
             <label className="field">
-              <span>Monthly SIP</span>
+              <span>Monthly</span>
               <input onChange={(e) => setSip((c) => ({ ...c, monthly: Number(e.target.value) }))} type="number" value={sip.monthly} />
               <input className="tool-slider" type="range" min="1000" max="100000" step="500" value={sip.monthly} onChange={(e) => setSip((c) => ({ ...c, monthly: Number(e.target.value) }))} />
             </label>
@@ -44,15 +44,15 @@ export default function ResearchLabPage() {
         </article>
 
         <article className="surface-card">
-          <div className="panel-kicker">EMI calculator</div>
+          <div className="panel-kicker">EMI</div>
           <div className="tool-form-pro">
             <label className="field">
-              <span>Loan amount</span>
+              <span>Loan</span>
               <input onChange={(e) => setLoan((c) => ({ ...c, principal: Number(e.target.value) }))} type="number" value={loan.principal} />
               <input className="tool-slider" type="range" min="100000" max="20000000" step="50000" value={loan.principal} onChange={(e) => setLoan((c) => ({ ...c, principal: Number(e.target.value) }))} />
             </label>
             <label className="field">
-              <span>Interest %</span>
+              <span>Rate %</span>
               <input onChange={(e) => setLoan((c) => ({ ...c, rate: Number(e.target.value) }))} type="number" value={loan.rate} />
               <input className="tool-slider" type="range" min="1" max="20" step="0.1" value={loan.rate} onChange={(e) => setLoan((c) => ({ ...c, rate: Number(e.target.value) }))} />
             </label>
@@ -62,7 +62,7 @@ export default function ResearchLabPage() {
               <input className="tool-slider" type="range" min="1" max="40" step="1" value={loan.years} onChange={(e) => setLoan((c) => ({ ...c, years: Number(e.target.value) }))} />
             </label>
           </div>
-          <div className="result-card">EMI: ₹{Math.round(emi).toLocaleString("en-IN")} / month</div>
+          <div className="result-card">EMI: ₹{Math.round(emi).toLocaleString("en-IN")} / mo</div>
         </article>
       </section>
     </div>

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Plus } from "lucide-react";
 
 const INIT = {
   clientName: "",
@@ -34,8 +35,8 @@ export default function MeetingLogForm({ onCreate }) {
 
   return (
     <section className="workspace-card accent-card sticky-panel">
-      <div className="section-kicker">New entry</div>
-      <h3>Log a meeting</h3>
+      <div className="section-kicker">New</div>
+      <h3>Log</h3>
 
       <form className="meeting-form" onSubmit={handleSubmit}>
         <div className="field">
@@ -98,8 +99,8 @@ export default function MeetingLogForm({ onCreate }) {
 
         <div className="form-actions">
           <span className="form-note">Ctrl+Enter</span>
-          <button disabled={busy} type="submit">
-            {busy ? "Saving..." : "Create log →"}
+          <button className="btn btn-primary btn-sm" disabled={busy} type="submit" aria-label="Create log">
+            Add log
           </button>
         </div>
       </form>

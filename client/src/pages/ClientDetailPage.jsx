@@ -30,7 +30,10 @@ export default function ClientDetailPage({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
-  useEffect(() => { setDraft(makeDraft(client)); setError(""); }, [client]);
+  useEffect(() => {
+    setDraft(makeDraft(client));
+    setError("");
+  }, [client]);
 
   const dirty = useMemo(() => {
     if (!client) return false;
@@ -44,7 +47,7 @@ export default function ClientDetailPage({
       <div className="page-stack">
         <section className="workspace-card empty-state">
           <h4>Client not found</h4>
-          <Link className="inline-link" to="/app/clients">← Back to clients</Link>
+          <Link className="inline-link" to="/app/clients">Back</Link>
         </section>
       </div>
     );
@@ -76,7 +79,7 @@ export default function ClientDetailPage({
               {client.city || "City not set"} · {client.relationshipStatus || "active"}
             </p>
           </div>
-          <Link className="ghost-link" to="/app/clients">← Clients</Link>
+          <Link className="ghost-link" to="/app/clients">Back</Link>
         </div>
 
         <div className="client-summary-grid">
@@ -105,10 +108,10 @@ export default function ClientDetailPage({
           <div className="section-heading-row">
             <h3>Details</h3>
             <div className="action-row">
-              <button className="btn btn-secondary btn-sm" onClick={() => { setDraft(makeDraft(client)); setError(""); }} disabled={!dirty || busy}>
+              <button className="btn btn-secondary btn-sm" onClick={() => { setDraft(makeDraft(client)); setError(""); }} disabled={!dirty || busy} type="button">
                 Reset
               </button>
-              <button className="btn btn-primary btn-sm" onClick={handleSave} disabled={!dirty || busy}>
+              <button className="btn btn-primary btn-sm" onClick={handleSave} disabled={!dirty || busy} type="button">
                 {busy ? "Saving..." : "Save"}
               </button>
             </div>
@@ -167,7 +170,7 @@ export default function ClientDetailPage({
                   </div>
                   {log.followUpSummary ? (
                     <div className="follow-up-inline">
-                      ↳ {log.followUpSummary}
+                      {log.followUpSummary}
                       {log.followUpDate ? ` / ${formatDateOnly(log.followUpDate)}` : ""}
                     </div>
                   ) : null}
@@ -177,7 +180,7 @@ export default function ClientDetailPage({
           </div>
         ) : (
           <div className="empty-state compact-empty-state">
-            <h4>No meetings yet</h4>
+            <h4>No meetings</h4>
           </div>
         )}
       </section>

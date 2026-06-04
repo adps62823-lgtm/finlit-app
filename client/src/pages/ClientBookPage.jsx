@@ -11,7 +11,10 @@ export default function ClientBookPage({ clients, tasks, onOpenImport }) {
     if (!needle) return clients;
     return clients.filter((client) =>
       [client.primaryHolderName, client.clientCode, client.city, client.email, client.mobile, client.familyName, client.notes, client.nextAction]
-        .filter(Boolean).join(" ").toLowerCase().includes(needle)
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase()
+        .includes(needle)
     );
   }, [clients, query]);
 
@@ -20,11 +23,10 @@ export default function ClientBookPage({ clients, tasks, onOpenImport }) {
       <section className="workspace-card page-hero">
         <div>
           <div className="section-kicker">Clients</div>
-          <h3>Client book</h3>
+          <h3>Book</h3>
         </div>
-        <button className="btn btn-primary" onClick={onOpenImport}>
-          <Plus size={14} />
-          Import
+        <button className="btn btn-primary" onClick={onOpenImport} type="button" aria-label="Import clients">
+          <Plus size={14} /> Import Clients 
         </button>
       </section>
 
@@ -32,7 +34,7 @@ export default function ClientBookPage({ clients, tasks, onOpenImport }) {
         <div className="filter-bar single-filter-bar">
           <input
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search by name, code, city, email..."
+            placeholder="Search clients..."
             value={query}
           />
         </div>
@@ -72,15 +74,13 @@ export default function ClientBookPage({ clients, tasks, onOpenImport }) {
                   </div>
                 </div>
 
-                {(client.nextAction || client.latestNotes) && (
-                  <p>{client.nextAction || client.latestNotes}</p>
-                )}
+                {(client.nextAction || client.latestNotes) ? <p>{client.nextAction || client.latestNotes}</p> : null}
               </Link>
             );
           })
         ) : (
           <section className="workspace-card empty-card-pro">
-            <h4>No clients yet</h4>
+            <h4>No clients</h4>
           </section>
         )}
       </section>

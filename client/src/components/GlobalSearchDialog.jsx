@@ -33,10 +33,10 @@ function buildResults({ clients, logs, tasks, messages, query }) {
   });
 
   tasks.forEach((task) => {
-    const candidate = [task.title, task.details, task.clientName, task.priority, task.status].filter(Boolean).join(" ");
+    const candidate = [task.title, task.details, task.clientName, task.priority, task.status, task.taskType, task.assignedToName].filter(Boolean).join(" ");
     const score = scoreText(candidate, needle);
     if (!score) return;
-    results.push({ id: `task-${task._id}`, type: "Task", icon: SquareCheckBig, title: task.title, meta: [task.clientName, task.dueDate ? formatDateOnly(task.dueDate) : "No due date"].filter(Boolean).join(" · "), path: `/app/clients/${task.clientId}`, score });
+    results.push({ id: `task-${task._id}`, type: "Task", icon: SquareCheckBig, title: task.title, meta: [task.clientName, task.assignedToName, task.dueDate ? formatDateOnly(task.dueDate) : "No due date"].filter(Boolean).join(" · "), path: `/app/tasks`, score });
   });
 
   messages.forEach((message) => {
@@ -68,11 +68,11 @@ export default function GlobalSearchDialog({ open, onClose, clients, logs, tasks
 
   return (
     <div className="dialog-backdrop" onClick={onClose} role="presentation">
-      <section className="dialog-shell search-dialog" role="dialog" aria-label="Global search" onClick={(event) => event.stopPropagation()}>
+      <section className="dialog-shell search-dialog" role="dialog" aria-label="Search" onClick={(event) => event.stopPropagation()}>
         <div className="dialog-header">
           <div>
             <div className="section-kicker">Search</div>
-            <h3>Global search</h3>
+            <h3>Search</h3>
           </div>
           <button className="icon-btn" onClick={onClose} aria-label="Close">
             <X size={16} />
@@ -85,7 +85,7 @@ export default function GlobalSearchDialog({ open, onClose, clients, logs, tasks
             autoFocus
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Clients, logs, tasks, messages..."
+            placeholder="Search..."
           />
           <kbd>Esc</kbd>
         </label>
@@ -93,7 +93,7 @@ export default function GlobalSearchDialog({ open, onClose, clients, logs, tasks
         <div className="search-results">
           {!query.trim() ? (
             <div className="empty-state">
-              <h4>Start typing to search</h4>
+              <h4>Type to search</h4>
             </div>
           ) : results.length ? (
             results.map((result) => {

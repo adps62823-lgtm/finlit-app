@@ -17,7 +17,9 @@ import { formatDateOnly, isOverdue } from "./utils/format";
 const CommandCenterPage = lazy(() => import("./pages/CommandCenterPage"));
 const ClientBookPage = lazy(() => import("./pages/ClientBookPage"));
 const ClientDetailPage = lazy(() => import("./pages/ClientDetailPage"));
+const PortfolioPage = lazy(() => import("./pages/PortfolioPage"));
 const MeetingsPage = lazy(() => import("./pages/MeetingsPage"));
+const TaskBoardPage = lazy(() => import("./pages/TaskBoardPage"));
 const ResearchLabPage = lazy(() => import("./pages/ResearchLabPage"));
 const TransactionsPage = lazy(() => import("./pages/TransactionsPage"));
 
@@ -53,6 +55,7 @@ export default function App() {
   const [messages, setMessages] = useState([]);
   const [clients, setClients] = useState([]);
   const [tasks, setTasks] = useState([]);
+  const [users, setUsers] = useState([]);
   const [filters, setFilters] = useState({ query: "", staff: "" });
   const [editingLog, setEditingLog] = useState(null);
   const [theme, setTheme] = useState(() => localStorage.getItem("theme") || "dark");
@@ -152,12 +155,13 @@ export default function App() {
   }, [notificationsEnabled, stats.dueTasks]);
 
   async function loadWorkspace(sessionToken) {
-    const [me, loadedMessages, loadedLogs, loadedClients, loadedTasks] = await Promise.all([
+    const [me, loadedMessages, loadedLogs, loadedClients, loadedTasks, loadedUsers] = await Promise.all([
       apiRequest("/auth/me", sessionToken),
       apiRequest("/chat/history?limit=50", sessionToken),
       apiRequest("/logs", sessionToken),
       apiRequest("/clients?limit=200", sessionToken),
-      apiRequest("/tasks?limit=200", sessionToken),
+      apiRequest("/tasks?limit=200&scope=all", sessionToken),
+      apiRequest("/users/team", sessionToken),
     ]);
 
     setToken(sessionToken);
@@ -166,6 +170,7 @@ export default function App() {
     setLogs(loadedLogs);
     setClients(loadedClients);
     setTasks(loadedTasks);
+    setUsers(loadedUsers);
     setAuthMessage("");
     return true;
   }
@@ -191,6 +196,7 @@ export default function App() {
     setMessages([]);
     setClients([]);
     setTasks([]);
+    setUsers([]);
     setAuthMessage("Your session expired. Please sign in again.");
     setLoading(false);
     pushNotice("warning", "Session expired", "Please sign in again to continue.");
@@ -321,6 +327,7 @@ export default function App() {
     setMessages([]);
     setClients([]);
     setTasks([]);
+    setUsers([]);
   }
 
   async function handleEnableNotifications() {
@@ -395,7 +402,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Navigate replace to="/app/command" />} />
             <Route path="/app/command" element={
-              <CommandCenterPage clients={clients} logs={logs} messages={messages} stats={stats} tasks={tasks} user={user} />
+            <CommandCenterPage clients={clients} logs={logs} messages={messages} stats={stats} tasks={tasks} user={user} />
             } />
             <Route path="/app/clients" element={
               <ClientBookPage
@@ -416,6 +423,7 @@ export default function App() {
                 busy={actionBusy}
               />
             } />
+            <Route path="/app/portfolio" element={<PortfolioPage clients={clients} />} />
             <Route path="/app/meetings" element={
               <MeetingsPage
                 filters={filters}
@@ -428,7 +436,21 @@ export default function App() {
                 busy={actionBusy}
               />
             } />
-            <Route path="/app/transactions" element={<TransactionsPage />} />
+            <Route path="/app/transactions" element={<TransactionsPage clients={clients} user={user} />} />
+            <Route
+              path="/app/tasks"
+              element={
+                <TaskBoardPage
+                  clients={clients}
+                  tasks={tasks}
+                  users={users}
+                  user={user}
+                  onCreateTask={handleCreateTask}
+                  onDeleteTask={handleDeleteTask}
+                  onToggleTaskStatus={(task, status) => handleUpdateTask(task._id, { status })}
+                />
+              }
+            />
             <Route path="/app/research" element={<ResearchLabPage />} />
           </Routes>
         </Suspense>

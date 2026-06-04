@@ -24,15 +24,23 @@ export default function MeetingsPage({
       <section className="workspace-card page-hero surface-card-hero meetings-page-header">
         <div>
           <div className="section-kicker">Meetings</div>
-          <h3>Meeting register</h3>
+          <h3>Register</h3>
         </div>
         <button
           className="btn btn-primary meetings-fab-trigger"
           onClick={() => setFormOpen((value) => !value)}
-          aria-label={formOpen ? "Close form" : "Log a meeting"}
+          aria-label={formOpen ? "Close" : "New log"}
+          type="button"
         >
-          {formOpen ? <X size={15} /> : <Plus size={15} />}
-          {formOpen ? "Close" : "New log"}
+          {formOpen ? (
+            <>
+              <X size={15} /> Close
+            </>
+          ) : (
+            <>
+              <Plus size={15} /> New meeting
+            </>
+          )}
         </button>
       </section>
 

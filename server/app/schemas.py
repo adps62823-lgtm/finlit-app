@@ -58,15 +58,19 @@ class FollowUpTaskCreate(BaseModel):
     title: str = Field(min_length=1)
     details: str = ""
     dueDate: Optional[date] = None
+    taskType: str = "follow_up"
     priority: Literal["low", "medium", "high"] = "medium"
+    assignedToUserId: Optional[str] = None
 
 
 class FollowUpTaskUpdate(BaseModel):
     title: Optional[str] = None
     details: Optional[str] = None
     dueDate: Optional[date] = None
+    taskType: Optional[str] = None
     priority: Optional[Literal["low", "medium", "high"]] = None
     status: Optional[Literal["open", "done"]] = None
+    assignedToUserId: Optional[str] = None
 
 
 class UploadSignRequest(BaseModel):
