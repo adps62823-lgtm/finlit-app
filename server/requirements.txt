@@ -6,3 +6,4 @@ firebase-admin==7.1.0
 python-dotenv==1.1.1
 cloudinary==1.44.1
 pydantic==2.11.7
+casparser
