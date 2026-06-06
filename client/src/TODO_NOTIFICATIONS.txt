@@ -1,0 +1,17 @@
+TODO Notifications implementation plan (client-only unread counts)
+1) Add Notifications page route: /app/notifications
+2) Add notifications icon + unread badge to sidebar (bell) and make it open notifications page.
+3) Derive notifications list from existing in-memory data:
+   - meeting logs: meeting events and follow-up events
+   - orders: bridge/queue actions (fallback: include orders as generic transaction notifications)
+   - chat: internal team chat should be hidden from notifications list; instead, only show unread count badge on chat FAB.
+4) Create client-side unread tracking:
+   - localStorage keys for unread notification ids and unread chat count.
+   - when new items arrive (socket chat:new and after refreshWorkspace), mark as unread if they aren’t marked as read.
+   - when opening notifications page, clear unread for notifications.
+5) Update CommandCenter timeline to show only meetings + follow-ups + transaction/order actions (remove chat from timeline).
+6) Update AppShell to include notifications nav item with badge overlay.
+7) Update GlobalChatWidget to show unread badge overlay when closed; clear badge when opened.
+8) Add basic styling for badges in client/src/styles.css (or relevant CSS files).
+9) Run quick build/lint: npm test/build.
+

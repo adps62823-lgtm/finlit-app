@@ -1,4 +1,4 @@
-﻿import React, { useState } from "react";
+﻿ import React, { useState } from "react";
 import {
   BellRing,
   BookOpen,
@@ -26,6 +26,7 @@ const NAV = [
   { to: "/app/portfolio", label: "Portfolio", Icon: Wallet },
   { to: "/app/meetings", label: "Meetings", Icon: BookOpen },
   { to: "/app/transactions", label: "Transactions", Icon: ShieldCheck },
+  { to: "/app/notifications", label: "Notifications", Icon: BellRing },
   { to: "/app/tasks", label: "Tasks", Icon: ListTodo },
   { to: "/app/research", label: "Research", Icon: BriefcaseBusiness },
 ];
@@ -36,6 +37,7 @@ const TITLES = {
   "/app/portfolio": { label: "Portfolio" },
   "/app/meetings": { label: "Meetings" },
   "/app/transactions": { label: "Orders" },
+  "/app/notifications": { label: "Notifications" },
   "/app/tasks": { label: "Tasks" },
   "/app/research": { label: "Tools" },
 };
@@ -61,6 +63,7 @@ export default function AppShell({
   onOpenImport,
   theme,
   children,
+  notificationsUnreadCount = 0,
 }) {
   const location = useLocation();
   const [drawerOpen, setDrawerOpen] = useState(true);
@@ -107,7 +110,18 @@ export default function AppShell({
               className={({ isActive }) => `workspace-nav-link${isActive ? " active" : ""}`}
               onClick={() => setDrawerOpen(false)}
             >
-              <Icon size={16} />
+              {to === "/app/notifications" ? (
+                <div className="nav-icon-wrap">
+                  <Icon size={16} />
+                  {notificationsUnreadCount > 0 ? (
+                    <span className="badge badge-nav" aria-label={`${notificationsUnreadCount} unread notifications`}>
+                      {notificationsUnreadCount > 99 ? "99+" : notificationsUnreadCount}
+                    </span>
+                  ) : null}
+                </div>
+              ) : (
+                <Icon size={16} />
+              )}
               <span>{label}</span>
               <ChevronRight size={14} className="nav-chevron" />
             </NavLink>

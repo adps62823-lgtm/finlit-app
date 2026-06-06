@@ -52,6 +52,9 @@ export default function CommandCenterPage({ clients, logs, messages, stats, task
   const timelineItems = useMemo(() => {
     const items = [];
 
+    // Timeline intentionally excludes internal chat messages.
+
+
     logs.forEach((log) => {
       items.push({
         id: `meeting-${log._id}`,
@@ -72,15 +75,7 @@ export default function CommandCenterPage({ clients, logs, messages, stats, task
       }
     });
 
-    messages.forEach((message) => {
-      items.push({
-        id: `chat-${message._id}`,
-        kind: "chat",
-        title: message.senderName,
-        detail: message.text || message.attachmentName || "Shared a file",
-        createdAt: message.createdAt,
-      });
-    });
+
 
     tasks.forEach((task) => {
       items.push({

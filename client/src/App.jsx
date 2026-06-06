@@ -22,6 +22,7 @@ const MeetingsPage = lazy(() => import("./pages/MeetingsPage"));
 const TaskBoardPage = lazy(() => import("./pages/TaskBoardPage"));
 const ResearchLabPage = lazy(() => import("./pages/ResearchLabPage"));
 const TransactionsPage = lazy(() => import("./pages/TransactionsPage"));
+const NotificationsPage = lazy(() => import("./pages/NotificationsPage"));
 
 function PageLoader() {
   return (
@@ -64,6 +65,30 @@ export default function App() {
   const [bulkImportOpen, setBulkImportOpen] = useState(false);
   const [notices, setNotices] = useState([]);
   const [actionBusy, setActionBusy] = useState(emptyActionState);
+
+  const NOTIF_UNREAD_KEY = "finlit_unread_notification_ids";
+  const CHAT_UNREAD_KEY = "finlit_unread_chat_count";
+
+  const [notificationsUnreadCount, setNotificationsUnreadCount] = useState(() => {
+    try {
+      const raw = localStorage.getItem(NOTIF_UNREAD_KEY);
+      const parsed = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed) ? parsed.length : 0;
+    } catch {
+      return 0;
+    }
+  });
+
+  const [chatUnreadCount, setChatUnreadCount] = useState(() => {
+    try {
+      const raw = localStorage.getItem(CHAT_UNREAD_KEY);
+      const parsed = raw ? Number(raw) : 0;
+      return Number.isFinite(parsed) ? parsed : 0;
+    } catch {
+      return 0;
+    }
+  });
+
   const [notificationsEnabled, setNotificationsEnabled] = useState(() => {
     // Wrap in try-catch: some mobile WebViews throw just accessing .permission
     try {
@@ -226,7 +251,8 @@ export default function App() {
   }, [notificationsEnabled, stats.dueTasks]);
 
   async function loadWorkspace(sessionToken) {
-    const [me, loadedMessages, loadedLogs, loadedClients, loadedTasks, loadedUsers] = await Promise.all([
+    const [me, loadedMessages, loadedLogs, loadedClients, loadedTasks, loadedUsers] = await Promise.all([ 
+
       apiRequest("/auth/me", sessionToken),
       apiRequest("/chat/history?limit=50", sessionToken),
       apiRequest("/logs", sessionToken),
@@ -540,6 +566,19 @@ export default function App() {
                 />
               }
             />
+            <Route path="/app/notifications" element={
+              <NotificationsPage
+                logs={logs}
+                orders={[]}
+                unreadCount={notificationsUnreadCount}
+                onClearUnread={() => {
+                  setNotificationsUnreadCount(0);
+                  try {
+                    localStorage.setItem(NOTIF_UNREAD_KEY, JSON.stringify([]));
+                  } catch {}
+                }}
+              />
+            } />
             <Route path="/app/research" element={<ResearchLabPage />} />
           </Routes>
         </Suspense>
@@ -558,7 +597,17 @@ export default function App() {
         onClose={() => setBulkImportOpen(false)}
         onImport={handleBulkImportClients}
       />
-      <GlobalChatWidget messages={messages} onSend={handleSendChat} />
+      <GlobalChatWidget
+        messages={messages}
+        onSend={handleSendChat}
+        chatUnreadCount={chatUnreadCount}
+        onMarkChatRead={() => {
+          setChatUnreadCount(0);
+          try {
+            localStorage.setItem(CHAT_UNREAD_KEY, JSON.stringify(0));
+          } catch {}
+        }}
+      />
       <LogEditModal
         log={editingLog}
         onClose={() => setEditingLog(null)}
