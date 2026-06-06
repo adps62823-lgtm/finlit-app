@@ -24,7 +24,16 @@ export async function apiRequest(path, token, options = {}) {
   });
 
   let authToken = await resolveToken(token);
-  let response = await attempt(authToken);
+  let response;
+  try {
+    response = await attempt(authToken);
+  } catch (error) {
+    const networkError = new Error(
+      "Unable to reach the backend. Check your API URL, network connectivity, and whether the backend is accessible from this deployment."
+    );
+    networkError.code = "NETWORK_ERROR";
+    throw networkError;
+  }
 
   if (response.status === 401 && auth.currentUser) {
     authToken = await auth.currentUser.getIdToken(true);

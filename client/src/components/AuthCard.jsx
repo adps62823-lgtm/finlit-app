@@ -17,8 +17,8 @@ export default function AuthCard({ onLogin, errorMessage = "" }) {
       const email = normalizeLoginToEmail(loginId);
       const credentials = await signInWithEmailAndPassword(auth, email, password);
       const sessionToken = await credentials.user.getIdToken();
-      localStorage.setItem("authToken", sessionToken);
       await onLogin(sessionToken);
+      localStorage.setItem("authToken", sessionToken);
     } catch (err) {
       setError(
         err.code === "auth/invalid-credential" || err.code === "auth/wrong-password"

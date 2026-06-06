@@ -17,12 +17,5 @@ def get_bse_starmf_status() -> dict:
         "memberCode": settings.bse_member_code,
         "apiBaseUrl": settings.bse_api_base_url,
         "phase": "manual_and_adapter_ready",
-        "nextStep": "Provide BSE StAR MF credentials or bridge specification to activate real transaction sync.",
+        "nextStep": "Provide BSE StAR MF credentials to activate real transaction submission.",
     }
-
-
-def submit_order_to_bse(_order_document: dict) -> dict:
-    raise NotImplementedError(
-        "Direct BSE StAR MF order submission is not implemented yet. "
-        "We need the actual integration spec, credentials, and approved transaction flow."
-    )

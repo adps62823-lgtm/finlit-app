@@ -1,5 +1,5 @@
 import React, { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
-import { signOut } from "firebase/auth";
+import { signOut, onAuthStateChanged } from "firebase/auth";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import AuthCard from "./components/AuthCard";
 import AppShell from "./components/AppShell";
@@ -79,14 +79,32 @@ export default function App() {
   useEffect(() => {
     const init = async () => {
       const savedToken = localStorage.getItem("authToken");
-      if (savedToken) {
-        try {
-          await loadWorkspace(savedToken);
-        } catch (error) {
-          await handleSessionExpired(error);
+      try {
+        const firebaseUser = await new Promise((resolve) => {
+          const unsubscribe = onAuthStateChanged(auth, (user) => {
+            unsubscribe();
+            resolve(user);
+          });
+        });
+
+        let sessionToken = savedToken;
+        if (firebaseUser) {
+          try {
+            sessionToken = await firebaseUser.getIdToken(true);
+            localStorage.setItem("authToken", sessionToken);
+          } catch (refreshError) {
+            console.warn("Failed to refresh Firebase ID token", refreshError);
+          }
         }
+
+        if (sessionToken) {
+          await loadWorkspace(sessionToken);
+        }
+      } catch (error) {
+        await handleSessionExpired(error);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
     init();
   // eslint-disable-next-line react-hooks/exhaustive-deps

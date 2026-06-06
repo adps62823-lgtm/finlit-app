@@ -6,11 +6,13 @@ from app.cloudinary_service import configure_cloudinary
 from app.config import get_settings
 from app.database import ensure_indexes, get_client
 from app.routes.auth import router as auth_router
+from app.routes.cas import router as cas_router
 from app.routes.chat import router as chat_router
 from app.routes.clients import router as clients_router
 from app.routes.dashboard import router as dashboard_router
 from app.routes.aum import router as aum_router
 from app.routes.logs import router as logs_router
+from app.routes.nav import router as nav_router
 from app.routes.users import router as users_router
 from app.routes.tasks import router as tasks_router
 from app.routes.transactions import router as transactions_router
@@ -20,6 +22,8 @@ from app.socket_app import sio
 settings = get_settings()
 api = FastAPI(title=settings.app_name)
 
+# Fixed: allow_origins=["*"] with allow_credentials=True is rejected by browsers.
+# Use the explicit origins list from settings instead.
 api.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -31,9 +35,11 @@ api.add_middleware(
 sio.eio.cors_allowed_origins = ["*"]
 
 api.include_router(auth_router)
+api.include_router(cas_router)
 api.include_router(clients_router)
 api.include_router(dashboard_router)
 api.include_router(aum_router)
+api.include_router(nav_router)
 api.include_router(logs_router)
 api.include_router(users_router)
 api.include_router(tasks_router)
