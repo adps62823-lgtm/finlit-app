@@ -1,24 +1,9 @@
-import React, { useEffect, useRef } from "react";
+import React from "react";
 
 export default function Splash({ message = "Loading..." }) {
-  const rootRef = useRef(null);
-
-  useEffect(() => {
-    // Safety valve only - if the app genuinely hangs for 6s, fade the splash
-    // so users are not permanently stuck. Normal loads dismiss via unmount.
-    const timer = setTimeout(() => {
-      if (rootRef.current) {
-        rootRef.current.style.opacity = "0";
-        rootRef.current.style.pointerEvents = "none";
-      }
-    }, 6000);
-    return () => clearTimeout(timer);
-  }, []);
-
   return (
     <div
       className="splash-root"
-      ref={rootRef}
       role="status"
       aria-live="polite"
       aria-label="Loading application"

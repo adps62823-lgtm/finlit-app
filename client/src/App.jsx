@@ -9,7 +9,7 @@ import GlobalSearchDialog from "./components/GlobalSearchDialog";
 import LogEditModal from "./components/LogEditModal";
 import Splash from "./components/Splash";
 import { auth } from "./firebase";
-import { apiRequest } from "./services/api";
+import { apiRequest, pingBackend } from "./services/api";
 import { createChatSocket } from "./services/chat";
 import { uploadToCloudinary } from "./services/upload";
 import { formatDateOnly, isOverdue } from "./utils/format";
@@ -50,6 +50,7 @@ export default function App() {
   const [token, setToken] = useState("");
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [splashMessage, setSplashMessage] = useState("Loading...");
   const [authMessage, setAuthMessage] = useState("");
   const [logs, setLogs] = useState([]);
   const [messages, setMessages] = useState([]);
@@ -76,6 +77,27 @@ export default function App() {
     localStorage.setItem("theme", theme);
   }, [theme]);
 
+  // Polls /health until the Render instance is warm, then returns.
+  // Updates splashMessage so the user sees live status instead of a stuck screen.
+  async function wakeUpBackend() {
+    const MAX_MS = 55000;
+    const POLL_MS = 3000;
+    const start = Date.now();
+    while (Date.now() - start < MAX_MS) {
+      setSplashMessage("Connecting to server...");
+      const alive = await pingBackend();
+      if (alive) {
+        setSplashMessage("Loading your workspace...");
+        return;
+      }
+      const elapsed = Math.round((Date.now() - start) / 1000);
+      setSplashMessage(`Server is starting up… (${elapsed}s)`);
+      await new Promise((r) => setTimeout(r, POLL_MS));
+    }
+    // Timed out — proceed anyway and let apiRequest surface the real error.
+    setSplashMessage("Loading your workspace...");
+  }
+
   useEffect(() => {
     const init = async () => {
       const savedToken = localStorage.getItem("authToken");
@@ -98,12 +120,31 @@ export default function App() {
         }
 
         if (sessionToken) {
-          await loadWorkspace(sessionToken);
+          await wakeUpBackend();
+          try {
+            await loadWorkspace(sessionToken);
+          } catch (error) {
+            // Only sign the user out for real auth failures.
+            // A NETWORK_ERROR means the backend was unreachable — the Firebase
+            // session is still valid, so don't call signOut(auth).
+            if (error?.code === "AUTH_EXPIRED") {
+              await handleSessionExpired(error);
+            }
+            // For NETWORK_ERROR or anything else during init, fall through:
+            // loading becomes false, user stays null, AuthCard is shown,
+            // and authMessage explains what happened.
+            if (error?.code === "NETWORK_ERROR") {
+              setAuthMessage("Could not reach the server. Please try signing in again.");
+            }
+          }
         }
       } catch (error) {
-        await handleSessionExpired(error);
+        if (error?.code === "AUTH_EXPIRED") {
+          await handleSessionExpired(error);
+        }
       } finally {
         setLoading(false);
+        setSplashMessage("Loading...");
       }
     };
     init();
@@ -373,19 +414,32 @@ export default function App() {
       && (!filters.staff || log.staffName === filters.staff);
   }), [filters, logs]);
 
-  if (loading) return <Splash />;
+  if (loading) return <Splash message={splashMessage} />;
 
   if (!user) {
     return (
       <AuthCard
         onLogin={async (sessionToken) => {
           setLoading(true);
+          setSplashMessage("Connecting to server...");
           try {
+            await wakeUpBackend();
             await loadWorkspace(sessionToken);
           } catch (error) {
-            await handleSessionExpired(error);
+            if (error?.code === "AUTH_EXPIRED") {
+              await handleSessionExpired(error);
+            } else {
+              // Network or other error — Firebase session is fine, just show the
+              // error on the auth screen and let the user try again.
+              setAuthMessage(
+                error?.code === "NETWORK_ERROR"
+                  ? "Server is taking too long to respond. Please try again in a moment."
+                  : error.message || "Something went wrong."
+              );
+            }
           } finally {
             setLoading(false);
+            setSplashMessage("Loading...");
           }
         }}
         errorMessage={authMessage}
