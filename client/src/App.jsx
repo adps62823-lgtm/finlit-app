@@ -64,11 +64,16 @@ export default function App() {
   const [bulkImportOpen, setBulkImportOpen] = useState(false);
   const [notices, setNotices] = useState([]);
   const [actionBusy, setActionBusy] = useState(emptyActionState);
-  const [notificationsEnabled, setNotificationsEnabled] = useState(
-    typeof window !== "undefined" && "Notification" in window
-      ? window.Notification.permission === "granted"
-      : false
-  );
+  const [notificationsEnabled, setNotificationsEnabled] = useState(() => {
+    // Wrap in try-catch: some mobile WebViews throw just accessing .permission
+    try {
+      return typeof window !== "undefined" &&
+        "Notification" in window &&
+        window.Notification.permission === "granted";
+    } catch {
+      return false;
+    }
+  });
   const socketRef = useRef(null);
   const reminderDigestRef = useRef("");
 
@@ -208,9 +213,16 @@ export default function App() {
     if (digest === reminderDigestRef.current) return;
     reminderDigestRef.current = digest;
     const topTask = stats.dueTasks[0];
-    new window.Notification("Finlit reminder", {
-      body: `${topTask.title} for ${topTask.clientName} is due soon.`,
-    });
+    try {
+      // Mobile browsers (Chrome Android, iOS) forbid new Notification() and
+      // require ServiceWorkerRegistration.showNotification() instead.
+      // Wrap in try-catch so a mobile crash never takes down the whole app.
+      new window.Notification("Finlit reminder", {
+        body: `${topTask.title} for ${topTask.clientName} is due soon.`,
+      });
+    } catch {
+      // Silently skip on mobile — the notice stack already shows due task alerts.
+    }
   }, [notificationsEnabled, stats.dueTasks]);
 
   async function loadWorkspace(sessionToken) {
@@ -394,14 +406,19 @@ export default function App() {
       pushNotice("warning", "Notifications unavailable", "This browser does not support alerts.");
       return;
     }
-    const permission = await window.Notification.requestPermission();
-    const enabled = permission === "granted";
-    setNotificationsEnabled(enabled);
-    pushNotice(
-      enabled ? "success" : "warning",
-      enabled ? "Notifications enabled" : "Notifications blocked",
-      enabled ? "You will now see proactive due reminders." : "Alerts stay disabled until permission is granted."
-    );
+    try {
+      const permission = await window.Notification.requestPermission();
+      const enabled = permission === "granted";
+      setNotificationsEnabled(enabled);
+      pushNotice(
+        enabled ? "success" : "warning",
+        enabled ? "Notifications enabled" : "Notifications blocked",
+        enabled ? "You will now see proactive due reminders." : "Alerts stay disabled until permission is granted."
+      );
+    } catch {
+      // Mobile browsers may throw on requestPermission() too
+      pushNotice("warning", "Notifications unavailable", "This browser does not support desktop alerts.");
+    }
   }
 
   function toggleTheme() {
