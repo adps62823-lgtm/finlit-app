@@ -28,6 +28,7 @@ class MeetingLogUpdate(BaseModel):
 
 class ClientUpdate(BaseModel):
     primaryHolderName: Optional[str] = None
+    pan: Optional[str] = None
     email: Optional[str] = None
     mobile: Optional[str] = None
     city: Optional[str] = None
@@ -41,6 +42,7 @@ class ClientUpdate(BaseModel):
 class ClientCreate(BaseModel):
     clientCode: Optional[str] = None
     primaryHolderName: str = Field(min_length=1)
+    pan: Optional[str] = None
     email: Optional[str] = None
     mobile: Optional[str] = None
     city: Optional[str] = None
@@ -61,6 +63,8 @@ class FollowUpTaskCreate(BaseModel):
     taskType: str = "follow_up"
     priority: Literal["low", "medium", "high"] = "medium"
     assignedToUserId: Optional[str] = None
+    requestedForUserId: Optional[str] = None
+    requestedForName: Optional[str] = None
 
 
 class FollowUpTaskUpdate(BaseModel):
@@ -71,6 +75,15 @@ class FollowUpTaskUpdate(BaseModel):
     priority: Optional[Literal["low", "medium", "high"]] = None
     status: Optional[Literal["open", "done"]] = None
     assignedToUserId: Optional[str] = None
+
+
+class TaskRequestDecision(BaseModel):
+    notes: Optional[str] = ""
+
+
+class NotificationMarkRead(BaseModel):
+    ids: list[str] = Field(default_factory=list)
+    markAll: bool = False
 
 
 class UploadSignRequest(BaseModel):

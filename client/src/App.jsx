@@ -17,11 +17,8 @@ import { formatDateOnly, isOverdue } from "./utils/format";
 const CommandCenterPage = lazy(() => import("./pages/CommandCenterPage"));
 const ClientBookPage = lazy(() => import("./pages/ClientBookPage"));
 const ClientDetailPage = lazy(() => import("./pages/ClientDetailPage"));
-const PortfolioPage = lazy(() => import("./pages/PortfolioPage"));
 const MeetingsPage = lazy(() => import("./pages/MeetingsPage"));
 const TaskBoardPage = lazy(() => import("./pages/TaskBoardPage"));
-const ResearchLabPage = lazy(() => import("./pages/ResearchLabPage"));
-const TransactionsPage = lazy(() => import("./pages/TransactionsPage"));
 const NotificationsPage = lazy(() => import("./pages/NotificationsPage"));
 
 function PageLoader() {
@@ -58,6 +55,7 @@ export default function App() {
   const [clients, setClients] = useState([]);
   const [tasks, setTasks] = useState([]);
   const [users, setUsers] = useState([]);
+  const [notifications, setNotifications] = useState([]);
   const [filters, setFilters] = useState({ query: "", staff: "" });
   const [editingLog, setEditingLog] = useState(null);
   const [theme, setTheme] = useState(() => localStorage.getItem("theme") || "dark");
@@ -66,28 +64,7 @@ export default function App() {
   const [notices, setNotices] = useState([]);
   const [actionBusy, setActionBusy] = useState(emptyActionState);
 
-  const NOTIF_UNREAD_KEY = "finlit_unread_notification_ids";
-  const CHAT_UNREAD_KEY = "finlit_unread_chat_count";
-
-  const [notificationsUnreadCount, setNotificationsUnreadCount] = useState(() => {
-    try {
-      const raw = localStorage.getItem(NOTIF_UNREAD_KEY);
-      const parsed = raw ? JSON.parse(raw) : [];
-      return Array.isArray(parsed) ? parsed.length : 0;
-    } catch {
-      return 0;
-    }
-  });
-
-  const [chatUnreadCount, setChatUnreadCount] = useState(() => {
-    try {
-      const raw = localStorage.getItem(CHAT_UNREAD_KEY);
-      const parsed = raw ? Number(raw) : 0;
-      return Number.isFinite(parsed) ? parsed : 0;
-    } catch {
-      return 0;
-    }
-  });
+  const [chatUnreadCount, setChatUnreadCount] = useState(0);
 
   const [notificationsEnabled, setNotificationsEnabled] = useState(() => {
     // Wrap in try-catch: some mobile WebViews throw just accessing .permission
@@ -101,6 +78,11 @@ export default function App() {
   });
   const socketRef = useRef(null);
   const reminderDigestRef = useRef("");
+  const currentUserIdRef = useRef("");
+  const notificationsUnreadCount = useMemo(
+    () => notifications.filter((item) => !item.readAt).length,
+    [notifications]
+  );
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
@@ -197,12 +179,21 @@ export default function App() {
     if (!token) return undefined;
     const socket = createChatSocket(token);
     socketRef.current = socket;
-    socket.on("chat:new", (message) => setMessages((current) => [...current, message]));
+    socket.on("chat:new", (message) => {
+      setMessages((current) => [...current, message]);
+      if (message?.senderId && message.senderId !== currentUserIdRef.current) {
+        setChatUnreadCount((current) => current + 1);
+      }
+    });
     return () => {
       socketRef.current = null;
       socket.disconnect();
     };
   }, [token]);
+
+  useEffect(() => {
+    currentUserIdRef.current = user?._id || "";
+  }, [user]);
 
   const stats = useMemo(() => {
     const today = new Date().toDateString();
@@ -251,14 +242,14 @@ export default function App() {
   }, [notificationsEnabled, stats.dueTasks]);
 
   async function loadWorkspace(sessionToken) {
-    const [me, loadedMessages, loadedLogs, loadedClients, loadedTasks, loadedUsers] = await Promise.all([ 
-
+    const [me, loadedMessages, loadedLogs, loadedClients, loadedTasks, loadedUsers, loadedNotifications] = await Promise.all([
       apiRequest("/auth/me", sessionToken),
       apiRequest("/chat/history?limit=50", sessionToken),
       apiRequest("/logs", sessionToken),
       apiRequest("/clients?limit=200", sessionToken),
       apiRequest("/tasks?limit=200&scope=all", sessionToken),
       apiRequest("/users/team", sessionToken),
+      apiRequest("/notifications?limit=200", sessionToken),
     ]);
 
     setToken(sessionToken);
@@ -268,6 +259,7 @@ export default function App() {
     setClients(loadedClients);
     setTasks(loadedTasks);
     setUsers(loadedUsers);
+    setNotifications(loadedNotifications);
     setAuthMessage("");
     return true;
   }
@@ -294,9 +286,24 @@ export default function App() {
     setClients([]);
     setTasks([]);
     setUsers([]);
+    setNotifications([]);
+    setChatUnreadCount(0);
     setAuthMessage("Your session expired. Please sign in again.");
     setLoading(false);
     pushNotice("warning", "Session expired", "Please sign in again to continue.");
+  }
+
+  async function markNotificationsRead() {
+    if (!notifications.length) return;
+    const unreadIds = notifications.filter((item) => !item.readAt).map((item) => item._id);
+    if (!unreadIds.length) return;
+    await apiRequest("/notifications/read", token, {
+      method: "PATCH",
+      body: JSON.stringify({ ids: unreadIds, markAll: true }),
+    });
+    setNotifications((current) =>
+      current.map((item) => (unreadIds.includes(item._id) ? { ...item, readAt: new Date().toISOString() } : item))
+    );
   }
 
   function pushNotice(tone, title, message) {
@@ -366,6 +373,13 @@ export default function App() {
     }, { title: "Task updated", message: "The follow-up has been saved." });
   }
 
+  async function handleTaskWorkflowAction(id, endpoint, title, message) {
+    await runAction("updateTask", async () => {
+      await apiRequest(`/tasks/${id}/${endpoint}`, token, { method: "POST" });
+      await refreshWorkspace();
+    }, { title, message });
+  }
+
   async function handleDeleteTask(id) {
     await runAction("deleteTask", async () => {
       await apiRequest(`/tasks/${id}`, token, { method: "DELETE" });
@@ -387,9 +401,16 @@ export default function App() {
     }, { title: "Client added", message: "A new client profile was created." });
   }
 
-  async function handleBulkImportClients(rows) {
+  async function handleBulkImportClients({ file, text }) {
     await runAction("bulkImport", async () => {
-      await apiRequest("/clients/bulk", token, { method: "POST", body: JSON.stringify(rows) });
+      const formData = new FormData();
+      if (file) {
+        formData.append("file", file);
+      }
+      if (text) {
+        formData.append("text", text);
+      }
+      await apiRequest("/clients/bulk/import", token, { method: "POST", body: formData });
       await refreshWorkspace();
     }, { title: "Import complete", message: "The client book has been updated." });
   }
@@ -410,6 +431,7 @@ export default function App() {
           reject(new Error(ack?.message || "Failed to send message."));
         });
       });
+      setChatUnreadCount(0);
     });
   }
 
@@ -423,8 +445,10 @@ export default function App() {
     setLogs([]);
     setMessages([]);
     setClients([]);
+    setNotifications([]);
     setTasks([]);
     setUsers([]);
+    setChatUnreadCount(0);
   }
 
   async function handleEnableNotifications() {
@@ -497,6 +521,7 @@ export default function App() {
         stats={stats}
         dueTasks={stats.dueTasks}
         notificationsEnabled={notificationsEnabled}
+        notificationsUnreadCount={notificationsUnreadCount}
         onEnableNotifications={handleEnableNotifications}
         onLogout={handleLogout}
         onToggleTheme={toggleTheme}
@@ -517,7 +542,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Navigate replace to="/app/command" />} />
             <Route path="/app/command" element={
-            <CommandCenterPage clients={clients} logs={logs} messages={messages} stats={stats} tasks={tasks} user={user} />
+            <CommandCenterPage clients={clients} logs={logs} stats={stats} tasks={tasks} user={user} />
             } />
             <Route path="/app/clients" element={
               <ClientBookPage
@@ -538,7 +563,6 @@ export default function App() {
                 busy={actionBusy}
               />
             } />
-            <Route path="/app/portfolio" element={<PortfolioPage clients={clients} />} />
             <Route path="/app/meetings" element={
               <MeetingsPage
                 filters={filters}
@@ -551,35 +575,32 @@ export default function App() {
                 busy={actionBusy}
               />
             } />
-            <Route path="/app/transactions" element={<TransactionsPage clients={clients} user={user} />} />
             <Route
               path="/app/tasks"
               element={
-                <TaskBoardPage
-                  clients={clients}
-                  tasks={tasks}
-                  users={users}
-                  user={user}
-                  onCreateTask={handleCreateTask}
-                  onDeleteTask={handleDeleteTask}
-                  onToggleTaskStatus={(task, status) => handleUpdateTask(task._id, { status })}
-                />
-              }
+              <TaskBoardPage
+                clients={clients}
+                tasks={tasks}
+                users={users}
+                user={user}
+                onCreateTask={handleCreateTask}
+                onDeleteTask={handleDeleteTask}
+                onToggleTaskStatus={(task, status) => handleUpdateTask(task._id, { status })}
+                onAcceptTaskRequest={(taskId) => handleTaskWorkflowAction(taskId, "accept-request", "Task approved", "The task request was accepted.")}
+                onRejectTaskRequest={(taskId) => handleTaskWorkflowAction(taskId, "reject-request", "Task rejected", "The task request was rejected.")}
+                onRequestTaskRejection={(taskId) => handleTaskWorkflowAction(taskId, "request-rejection", "Rejection requested", "The rejection request was sent.")}
+                onAcceptTaskRejection={(taskId) => handleTaskWorkflowAction(taskId, "accept-rejection", "Task removed", "The task was rejected and removed.")}
+                onRejectTaskRejection={(taskId) => handleTaskWorkflowAction(taskId, "reject-rejection", "Task kept active", "The task stays active.")}
+              />
+            }
             />
             <Route path="/app/notifications" element={
               <NotificationsPage
-                logs={logs}
-                orders={[]}
+                notifications={notifications}
                 unreadCount={notificationsUnreadCount}
-                onClearUnread={() => {
-                  setNotificationsUnreadCount(0);
-                  try {
-                    localStorage.setItem(NOTIF_UNREAD_KEY, JSON.stringify([]));
-                  } catch {}
-                }}
+                onClearUnread={markNotificationsRead}
               />
             } />
-            <Route path="/app/research" element={<ResearchLabPage />} />
           </Routes>
         </Suspense>
       </AppShell>
@@ -593,6 +614,7 @@ export default function App() {
         messages={messages}
       />
       <BulkClientImportModal
+        busy={actionBusy.bulkImport}
         open={bulkImportOpen}
         onClose={() => setBulkImportOpen(false)}
         onImport={handleBulkImportClients}
@@ -603,9 +625,6 @@ export default function App() {
         chatUnreadCount={chatUnreadCount}
         onMarkChatRead={() => {
           setChatUnreadCount(0);
-          try {
-            localStorage.setItem(CHAT_UNREAD_KEY, JSON.stringify(0));
-          } catch {}
         }}
       />
       <LogEditModal

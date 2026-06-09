@@ -77,6 +77,10 @@ def get_tasks_collection():
     return get_db()["follow_up_tasks"]
 
 
+def get_notifications_collection():
+    return get_db()["notifications"]
+
+
 def ensure_indexes() -> None:
     users = get_users_collection()
     users.create_index("firebaseUid", unique=True)

@@ -2,17 +2,14 @@
 import {
   BellRing,
   BookOpen,
-  BriefcaseBusiness,
   ChevronRight,
   CirclePlus,
   LayoutDashboard,
   LogOut,
   Menu,
   Search,
-  ShieldCheck,
   Sparkles,
   SunMedium,
-  Wallet,
   Users,
   X,
   MoonStar,
@@ -23,23 +20,17 @@ import { NavLink, useLocation } from "react-router-dom";
 const NAV = [
   { to: "/app/command", label: "Command", Icon: LayoutDashboard },
   { to: "/app/clients", label: "Clients", Icon: Users },
-  { to: "/app/portfolio", label: "Portfolio", Icon: Wallet },
   { to: "/app/meetings", label: "Meetings", Icon: BookOpen },
-  { to: "/app/transactions", label: "Transactions", Icon: ShieldCheck },
   { to: "/app/notifications", label: "Notifications", Icon: BellRing },
   { to: "/app/tasks", label: "Tasks", Icon: ListTodo },
-  { to: "/app/research", label: "Research", Icon: BriefcaseBusiness },
 ];
 
 const TITLES = {
   "/app/command": { label: "Overview" },
   "/app/clients": { label: "Clients" },
-  "/app/portfolio": { label: "Portfolio" },
   "/app/meetings": { label: "Meetings" },
-  "/app/transactions": { label: "Orders" },
   "/app/notifications": { label: "Notifications" },
   "/app/tasks": { label: "Tasks" },
-  "/app/research": { label: "Tools" },
 };
 
 function StatChip({ label, value }) {

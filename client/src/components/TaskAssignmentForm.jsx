@@ -26,7 +26,7 @@ export default function TaskAssignmentForm({ clients = [], users = [], onCreate,
   const [error, setError] = useState("");
 
   const selectedClient = useMemo(() => clients.find((client) => client._id === form.clientId), [clients, form.clientId]);
-  const visibleUsers = user?.role === "owner" ? users : users.filter((member) => member._id === user?._id);
+  const visibleUsers = user?.role === "owner" ? users : users.filter((member) => member._id !== user?._id);
 
   const set = (key) => (event) => setForm((current) => ({ ...current, [key]: event.target.value }));
 
@@ -55,7 +55,7 @@ export default function TaskAssignmentForm({ clients = [], users = [], onCreate,
   return (
     <form className="workspace-card task-assignment-form" onSubmit={handleSubmit}>
       <div className="section-kicker">Assign</div>
-      <h3>Task desk</h3>
+      <h3>{user?.role === "owner" ? "Owner task desk" : "Task request desk"}</h3>
 
       <div className="task-assignment-grid">
         <label className="field">
@@ -63,7 +63,9 @@ export default function TaskAssignmentForm({ clients = [], users = [], onCreate,
           <select value={form.clientId} onChange={set("clientId")} required>
             <option value="">Select client</option>
             {clients.map((client) => (
-              <option key={client._id} value={client._id}>{client.primaryHolderName}</option>
+              <option key={client._id} value={client._id}>
+                {client.primaryHolderName}
+              </option>
             ))}
           </select>
         </label>
@@ -72,7 +74,9 @@ export default function TaskAssignmentForm({ clients = [], users = [], onCreate,
           <span>Type</span>
           <select value={form.taskType} onChange={set("taskType")}>
             {TASK_TYPES.map((type) => (
-              <option key={type.value} value={type.value}>{type.label}</option>
+              <option key={type.value} value={type.value}>
+                {type.label}
+              </option>
             ))}
           </select>
         </label>
@@ -92,13 +96,9 @@ export default function TaskAssignmentForm({ clients = [], users = [], onCreate,
         </label>
 
         <label className="field">
-          <span>Assign</span>
-          <select
-            value={form.assignedToUserId}
-            onChange={set("assignedToUserId")}
-            disabled={user?.role !== "owner"}
-          >
-            <option value="">{user?.role === "owner" ? "Self / auto" : user?.name || "Self"}</option>
+          <span>{user?.role === "owner" ? "Assign to" : "Request for"}</span>
+          <select value={form.assignedToUserId} onChange={set("assignedToUserId")}>
+            <option value="">Select person</option>
             {visibleUsers.map((member) => (
               <option key={member._id} value={member._id}>
                 {member.name} · {member.role}
@@ -126,7 +126,7 @@ export default function TaskAssignmentForm({ clients = [], users = [], onCreate,
       {error ? <div className="inline-error">{error}</div> : null}
 
       <div className="form-actions">
-        <span className="form-note">Fast assign</span>
+        <span className="form-note">{user?.role === "owner" ? "Direct assign" : "Request approval"}</span>
         <button className="btn btn-primary btn-sm" disabled={busy} type="submit" aria-label="Create task">
           <Plus size={14} />
         </button>

@@ -23,6 +23,7 @@ function abortableFetch(url, options, timeoutMs) {
 }
 
 export async function apiRequest(path, token, options = {}) {
+  const isFormData = typeof FormData !== "undefined" && options.body instanceof FormData;
   const makeAttempt = (authToken) =>
     abortableFetch(
       `${API_URL}${path}`,
@@ -30,7 +31,7 @@ export async function apiRequest(path, token, options = {}) {
         ...options,
         headers: {
           ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
-          ...(options.body ? { "Content-Type": "application/json" } : {}),
+          ...(options.body && !isFormData ? { "Content-Type": "application/json" } : {}),
           ...(options.headers || {}),
         },
       },

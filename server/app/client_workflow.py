@@ -85,6 +85,8 @@ def upsert_client_from_payload(payload, user: dict) -> tuple[dict, bool]:
             {"searchName": normalized_name},
         ]
     }
+    if getattr(payload, "pan", None):
+        search_query["$or"].insert(0, {"pan": payload.pan.strip().upper()})
     if payload.email:
         search_query["$or"].append({"email": payload.email.strip().lower()})
     if payload.mobile:
@@ -97,6 +99,7 @@ def upsert_client_from_payload(payload, user: dict) -> tuple[dict, bool]:
         "clientCode": client_code,
         "primaryHolderName": payload.primaryHolderName.strip(),
         "searchName": normalized_name,
+        "pan": (getattr(payload, "pan", "") or "").strip().upper(),
         "email": (payload.email or "").strip().lower(),
         "mobile": (payload.mobile or "").strip(),
         "city": (payload.city or "").strip(),

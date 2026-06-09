@@ -9,8 +9,6 @@ const TIMELINE_TABS = [
   { id: "all", label: "All" },
   { id: "meeting", label: "Meetings" },
   { id: "followup", label: "Follow-ups" },
-  { id: "chat", label: "Chat" },
-  { id: "task", label: "Tasks" },
 ];
 
 const COVERAGE_TABS = [
@@ -45,7 +43,7 @@ function daysSince(value) {
   return (Date.now() - date.getTime()) / 86400000;
 }
 
-export default function CommandCenterPage({ clients, logs, messages, stats, tasks, user }) {
+export default function CommandCenterPage({ clients, logs, stats, tasks, user }) {
   const [activePanel, setActivePanel] = useState("");
   const [activeFilter, setActiveFilter] = useState("all");
 
@@ -77,18 +75,8 @@ export default function CommandCenterPage({ clients, logs, messages, stats, task
 
 
 
-    tasks.forEach((task) => {
-      items.push({
-        id: `task-${task._id}`,
-        kind: "task",
-        title: task.title,
-        detail: [task.clientName, task.assignedToName || "Self"].filter(Boolean).join(" · "),
-        createdAt: task.createdAt,
-      });
-    });
-
     return sortNewest(items);
-  }, [logs, messages, tasks]);
+  }, [logs]);
 
   const openTasks = useMemo(
     () => tasks.filter((task) => task.status === "open").sort((a, b) => {

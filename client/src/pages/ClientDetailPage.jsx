@@ -22,6 +22,12 @@ export default function ClientDetailPage({
   onCreateTask,
   onDeleteTask,
   onToggleTaskStatus,
+  onAcceptTaskRequest,
+  onRejectTaskRequest,
+  onRequestTaskRejection,
+  onAcceptTaskRejection,
+  onRejectTaskRejection,
+  user,
   onUpdateClient,
 }) {
   const { clientId } = useParams();
@@ -146,6 +152,12 @@ export default function ClientDetailPage({
           <TaskComposer clientId={clientId} onCreate={onCreateTask} />
           <TaskList
             emptyText="No tasks yet."
+            currentUser={user}
+            onAcceptRequest={onAcceptTaskRequest}
+            onRejectRequest={onRejectTaskRequest}
+            onRequestRejection={onRequestTaskRejection}
+            onAcceptRejection={onAcceptTaskRejection}
+            onRejectRejection={onRejectTaskRejection}
             onDelete={onDeleteTask}
             onToggleStatus={onToggleTaskStatus}
             tasks={clientTasks}

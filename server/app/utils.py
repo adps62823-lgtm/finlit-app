@@ -8,6 +8,8 @@ def utc_now() -> datetime:
 
 
 def object_id(value: str) -> ObjectId:
+    if isinstance(value, ObjectId):
+        return value
     return ObjectId(value)
 
 
@@ -97,6 +99,10 @@ def map_order(document: dict) -> dict:
 
 
 def map_task(document: dict) -> dict:
+    return _serialize_document(dict(document))
+
+
+def map_notification(document: dict) -> dict:
     return _serialize_document(dict(document))
 
 

@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile, status
 
 from app.auth import get_current_user
+from app.client_imports import enrich_import_rows_with_gemini, normalize_import_row, parse_bulk_client_source
 from app.client_workflow import date_to_utc_datetime, refresh_client_summary, upsert_client_from_payload
 from app.database import (
     get_clients_collection,
@@ -11,6 +12,7 @@ from app.database import (
     get_sip_registrations_collection,
     get_tasks_collection,
 )
+from app.config import get_settings
 from app.schemas import ClientCreate, ClientUpdate
 from app.utils import (
     map_client,
@@ -40,6 +42,7 @@ def list_clients(
             **query,
             "$or": [
                 {"primaryHolderName": search},
+                {"pan": search},
                 {"clientCode": search},
                 {"email": search},
                 {"mobile": search},
@@ -77,6 +80,59 @@ def bulk_create_clients(payload: list[ClientCreate], user: dict = Depends(get_cu
         "created": created_count,
         "updated": updated_count,
         "total": len(payload),
+        "clients": clients,
+    }
+
+
+@router.post("/bulk/import")
+async def bulk_import_clients(
+    user: dict = Depends(get_current_user),
+    file: UploadFile | None = File(default=None),
+    text: str = Form(default=""),
+):
+    raw_bytes = await file.read() if file else None
+    try:
+        raw_rows = parse_bulk_client_source(
+            filename=file.filename if file else "",
+            content_type=file.content_type if file else "",
+            raw_bytes=raw_bytes,
+            text=text,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+    if not raw_rows:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No client rows were found in the upload.")
+
+    enriched_rows, ai_used, ai_error = enrich_import_rows_with_gemini(raw_rows)
+
+    created_count = 0
+    updated_count = 0
+    skipped_count = 0
+    clients = []
+
+    valid_fields = set(ClientCreate.model_fields.keys())
+    for row in enriched_rows:
+        if not (row.get("primaryHolderName") or "").strip():
+            skipped_count += 1
+            continue
+
+        payload_data = {key: value for key, value in row.items() if key in valid_fields}
+        payload = ClientCreate.model_validate(payload_data)
+        client, created = upsert_client_from_payload(payload, user)
+        clients.append(map_client(client))
+        if created:
+            created_count += 1
+        else:
+            updated_count += 1
+
+    settings = get_settings()
+    return {
+        "created": created_count,
+        "updated": updated_count,
+        "skipped": skipped_count,
+        "total": len(enriched_rows),
+        "aiUsed": ai_used,
+        "aiError": ai_error if settings.gemini_api_key else "",
         "clients": clients,
     }
 

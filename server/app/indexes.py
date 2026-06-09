@@ -116,6 +116,11 @@ def create_platform_indexes(db):
     _create_index_if_missing(db.chat_messages, [("createdAt", DESCENDING)], name="idx_chat_date")
     _create_index_if_missing(db.follow_up_tasks, [("clientId", ASCENDING), ("status", ASCENDING), ("dueDate", ASCENDING)], name="idx_tasks_client_status_due")
     _create_index_if_missing(db.follow_up_tasks, [("assignedToUserId", ASCENDING), ("status", ASCENDING), ("dueDate", ASCENDING)], name="idx_tasks_owner_status_due")
+    _create_index_if_missing(db.follow_up_tasks, [("requestedForUserId", ASCENDING), ("approvalStatus", ASCENDING), ("createdAt", DESCENDING)], name="idx_tasks_request_target")
+    _create_index_if_missing(db.follow_up_tasks, [("requestedByUserId", ASCENDING), ("approvalStatus", ASCENDING), ("createdAt", DESCENDING)], name="idx_tasks_request_origin")
+
+    _create_index_if_missing(db.notifications, [("recipientUserId", ASCENDING), ("readAt", ASCENDING), ("createdAt", DESCENDING)], name="idx_notifications_recipient_read_date")
+    _create_index_if_missing(db.notifications, [("dedupeKey", ASCENDING), ("recipientUserId", ASCENDING)], unique=True, sparse=True, name="uq_notifications_dedupe")
 
     _create_index_if_missing(db.import_batches, [("source", ASCENDING), ("startedAt", DESCENDING)], name="idx_import_source_date")
     _create_index_if_missing(db.import_batches, [("status", ASCENDING)], name="idx_import_status")

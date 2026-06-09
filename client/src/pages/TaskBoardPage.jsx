@@ -6,6 +6,7 @@ import TaskList from "../components/TaskList";
 const TABS = [
   { id: "mine", label: "Mine" },
   { id: "team", label: "Team" },
+  { id: "requests", label: "Requests" },
   { id: "open", label: "Open" },
   { id: "done", label: "Done" },
 ];
@@ -18,6 +19,11 @@ export default function TaskBoardPage({
   onCreateTask,
   onDeleteTask,
   onToggleTaskStatus,
+  onAcceptTaskRequest,
+  onRejectTaskRequest,
+  onRequestTaskRejection,
+  onAcceptTaskRejection,
+  onRejectTaskRejection,
 }) {
   const [activeTab, setActiveTab] = useState(user?.role === "owner" ? "team" : "mine");
 
@@ -29,6 +35,9 @@ export default function TaskBoardPage({
   const filteredTasks = useMemo(() => {
     if (activeTab === "mine") return assignedToMe;
     if (activeTab === "team") return assignedToOthers;
+    if (activeTab === "requests") {
+      return tasks.filter((task) => task.status === "request_pending" || task.approvalStatus === "rejection_requested");
+    }
     if (activeTab === "open") return tasks.filter((task) => task.status === "open");
     if (activeTab === "done") return tasks.filter((task) => task.status === "done");
     return tasks;
@@ -79,9 +88,15 @@ export default function TaskBoardPage({
           <TaskList
             tasks={filteredTasks}
             onDelete={onDeleteTask}
+            onAcceptRequest={onAcceptTaskRequest}
+            onRejectRequest={onRejectTaskRequest}
+            onRequestRejection={onRequestTaskRejection}
+            onAcceptRejection={onAcceptTaskRejection}
+            onRejectRejection={onRejectTaskRejection}
             onToggleStatus={onToggleTaskStatus}
+            currentUser={user}
             showClient
-            emptyText={activeTab === "team" ? "No team follow-ups." : "No follow-ups."}
+            emptyText={activeTab === "team" ? "No team follow-ups." : activeTab === "requests" ? "No task requests." : "No follow-ups."}
           />
         </section>
       </div>
