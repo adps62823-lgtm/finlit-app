@@ -1,0 +1,67 @@
+/* ─── BADGES ─────────────────────────────────────────────────────────────── */
+
+/* Base badge — red pill with white number, matches reference photo */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: #e02424;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0;
+  border: 2px solid var(--bg);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* Badge sitting on top of the nav icon (bell in sidebar / mobile nav) */
+.nav-icon-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.badge-nav {
+  position: absolute;
+  top: -7px;
+  right: -9px;
+  /* number shown — inherits base .badge styles */
+}
+
+/* Badge on the chat FAB — bottom-right corner of the button */
+.chat-fab {
+  position: relative; /* ensure stacking context */
+}
+
+.badge-fab {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+}
+
+/* Red dot on the topbar hamburger menu — no number, just a dot */
+.topbar-menu-wrap {
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+.badge-menu-dot {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 9px;
+  height: 9px;
+  min-width: unset;
+  padding: 0;
+  border-radius: 50%;
+  background: #e02424;
+  border: 2px solid var(--bg);
+}

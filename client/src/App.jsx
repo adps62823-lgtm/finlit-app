@@ -44,6 +44,22 @@ function emptyActionState() {
   };
 }
 
+// ─── Push notification helper ────────────────────────────────────────────────
+// Safely fires a push notification. Silently skips on mobile browsers that
+// don't support new Notification() (they require SW.showNotification instead).
+function firePush(title, body) {
+  try {
+    if (
+      typeof window === "undefined" ||
+      !("Notification" in window) ||
+      window.Notification.permission !== "granted"
+    ) return;
+    new window.Notification(title, { body });
+  } catch {
+    // Mobile browsers throw — silently ignore
+  }
+}
+
 export default function App() {
   const [token, setToken] = useState("");
   const [user, setUser] = useState(null);
@@ -67,7 +83,6 @@ export default function App() {
   const [chatUnreadCount, setChatUnreadCount] = useState(0);
 
   const [notificationsEnabled, setNotificationsEnabled] = useState(() => {
-    // Wrap in try-catch: some mobile WebViews throw just accessing .permission
     try {
       return typeof window !== "undefined" &&
         "Notification" in window &&
@@ -76,9 +91,18 @@ export default function App() {
       return false;
     }
   });
+
   const socketRef = useRef(null);
-  const reminderDigestRef = useRef("");
   const currentUserIdRef = useRef("");
+
+  // ─── Dedup refs — track what we've already pushed so we don't re-fire ──────
+  const pushedReminderIdsRef = useRef(new Set());
+  const pushedTaskIdsRef = useRef(new Set());
+  const pushedLogIdsRef = useRef(new Set());
+  // Track task/log counts so we only push on genuinely new items
+  const prevTaskCountRef = useRef(null);
+  const prevLogCountRef = useRef(null);
+
   const notificationsUnreadCount = useMemo(
     () => notifications.filter((item) => !item.readAt).length,
     [notifications]
@@ -89,8 +113,6 @@ export default function App() {
     localStorage.setItem("theme", theme);
   }, [theme]);
 
-  // Polls /health until the Render instance is warm, then returns.
-  // Updates splashMessage so the user sees live status instead of a stuck screen.
   async function wakeUpBackend() {
     const MAX_MS = 55000;
     const POLL_MS = 3000;
@@ -106,7 +128,6 @@ export default function App() {
       setSplashMessage(`Server is starting up… (${elapsed}s)`);
       await new Promise((r) => setTimeout(r, POLL_MS));
     }
-    // Timed out — proceed anyway and let apiRequest surface the real error.
     setSplashMessage("Loading your workspace...");
   }
 
@@ -136,15 +157,9 @@ export default function App() {
           try {
             await loadWorkspace(sessionToken);
           } catch (error) {
-            // Only sign the user out for real auth failures.
-            // A NETWORK_ERROR means the backend was unreachable — the Firebase
-            // session is still valid, so don't call signOut(auth).
             if (error?.code === "AUTH_EXPIRED") {
               await handleSessionExpired(error);
             }
-            // For NETWORK_ERROR or anything else during init, fall through:
-            // loading becomes false, user stays null, AuthCard is shown,
-            // and authMessage explains what happened.
             if (error?.code === "NETWORK_ERROR") {
               setAuthMessage("Could not reach the server. Please try signing in again.");
             }
@@ -175,6 +190,7 @@ export default function App() {
     return () => window.removeEventListener("keydown", handleShortcut);
   }, []);
 
+  // ─── Socket: new chat push notification ──────────────────────────────────
   useEffect(() => {
     if (!token) return undefined;
     const socket = createChatSocket(token);
@@ -183,6 +199,8 @@ export default function App() {
       setMessages((current) => [...current, message]);
       if (message?.senderId && message.senderId !== currentUserIdRef.current) {
         setChatUnreadCount((current) => current + 1);
+        // Push notification for new chat message
+        firePush("New Chat", `From ${message.senderName || "a teammate"}`);
       }
     });
     return () => {
@@ -223,23 +241,58 @@ export default function App() {
     };
   }, [clients, logs, messages, tasks]);
 
+  // ─── Push: due reminders ─────────────────────────────────────────────────
   useEffect(() => {
-    if (!notificationsEnabled || !stats.dueTasks.length || !("Notification" in window)) return;
-    const digest = stats.dueTasks.map((task) => task._id).join("|");
-    if (digest === reminderDigestRef.current) return;
-    reminderDigestRef.current = digest;
-    const topTask = stats.dueTasks[0];
-    try {
-      // Mobile browsers (Chrome Android, iOS) forbid new Notification() and
-      // require ServiceWorkerRegistration.showNotification() instead.
-      // Wrap in try-catch so a mobile crash never takes down the whole app.
-      new window.Notification("Finlit reminder", {
-        body: `${topTask.title} for ${topTask.clientName} is due soon.`,
-      });
-    } catch {
-      // Silently skip on mobile — the notice stack already shows due task alerts.
-    }
+    if (!notificationsEnabled || !stats.dueTasks.length) return;
+    stats.dueTasks.forEach((task) => {
+      if (pushedReminderIdsRef.current.has(task._id)) return;
+      pushedReminderIdsRef.current.add(task._id);
+      firePush("Reminder", task.followUpSummary || task.title || `Follow up with ${task.clientName}`);
+    });
   }, [notificationsEnabled, stats.dueTasks]);
+
+  // ─── Push: new tasks assigned to current user ────────────────────────────
+  useEffect(() => {
+    if (!notificationsEnabled || !user) return;
+    const myTasks = tasks.filter(
+      (t) => t.assignedToUserId === user._id || t.requestedForUserId === user._id
+    );
+    // Skip the very first load to avoid blasting notifications on sign-in
+    if (prevTaskCountRef.current === null) {
+      prevTaskCountRef.current = myTasks.length;
+      myTasks.forEach((t) => pushedTaskIdsRef.current.add(t._id));
+      return;
+    }
+    myTasks.forEach((task) => {
+      if (pushedTaskIdsRef.current.has(task._id)) return;
+      pushedTaskIdsRef.current.add(task._id);
+      const assigner = task.createdByName || task.requestedByName || "Someone";
+      firePush("New Task", `${assigner} — ${task.clientName}`);
+    });
+    prevTaskCountRef.current = myTasks.length;
+  }, [notificationsEnabled, tasks, user]);
+
+  // ─── Push: new meeting logs ──────────────────────────────────────────────
+  useEffect(() => {
+    if (!notificationsEnabled || !logs.length) return;
+    // Skip the very first load
+    if (prevLogCountRef.current === null) {
+      prevLogCountRef.current = logs.length;
+      logs.forEach((l) => pushedLogIdsRef.current.add(l._id));
+      return;
+    }
+    logs.forEach((log) => {
+      if (pushedLogIdsRef.current.has(log._id)) return;
+      // Only push meetings created by others
+      if (log.staffId === currentUserIdRef.current) {
+        pushedLogIdsRef.current.add(log._id);
+        return;
+      }
+      pushedLogIdsRef.current.add(log._id);
+      firePush("New Meeting", log.clientName);
+    });
+    prevLogCountRef.current = logs.length;
+  }, [notificationsEnabled, logs]);
 
   async function loadWorkspace(sessionToken) {
     const [me, loadedMessages, loadedLogs, loadedClients, loadedTasks, loadedUsers, loadedNotifications] = await Promise.all([
@@ -466,7 +519,6 @@ export default function App() {
         enabled ? "You will now see proactive due reminders." : "Alerts stay disabled until permission is granted."
       );
     } catch {
-      // Mobile browsers may throw on requestPermission() too
       pushNotice("warning", "Notifications unavailable", "This browser does not support desktop alerts.");
     }
   }
@@ -496,8 +548,6 @@ export default function App() {
             if (error?.code === "AUTH_EXPIRED") {
               await handleSessionExpired(error);
             } else {
-              // Network or other error — Firebase session is fine, just show the
-              // error on the auth screen and let the user try again.
               setAuthMessage(
                 error?.code === "NETWORK_ERROR"
                   ? "Server is taking too long to respond. Please try again in a moment."
@@ -542,7 +592,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Navigate replace to="/app/command" />} />
             <Route path="/app/command" element={
-            <CommandCenterPage clients={clients} logs={logs} stats={stats} tasks={tasks} user={user} />
+              <CommandCenterPage clients={clients} logs={logs} stats={stats} tasks={tasks} user={user} />
             } />
             <Route path="/app/clients" element={
               <ClientBookPage
@@ -578,21 +628,21 @@ export default function App() {
             <Route
               path="/app/tasks"
               element={
-              <TaskBoardPage
-                clients={clients}
-                tasks={tasks}
-                users={users}
-                user={user}
-                onCreateTask={handleCreateTask}
-                onDeleteTask={handleDeleteTask}
-                onToggleTaskStatus={(task, status) => handleUpdateTask(task._id, { status })}
-                onAcceptTaskRequest={(taskId) => handleTaskWorkflowAction(taskId, "accept-request", "Task approved", "The task request was accepted.")}
-                onRejectTaskRequest={(taskId) => handleTaskWorkflowAction(taskId, "reject-request", "Task rejected", "The task request was rejected.")}
-                onRequestTaskRejection={(taskId) => handleTaskWorkflowAction(taskId, "request-rejection", "Rejection requested", "The rejection request was sent.")}
-                onAcceptTaskRejection={(taskId) => handleTaskWorkflowAction(taskId, "accept-rejection", "Task removed", "The task was rejected and removed.")}
-                onRejectTaskRejection={(taskId) => handleTaskWorkflowAction(taskId, "reject-rejection", "Task kept active", "The task stays active.")}
-              />
-            }
+                <TaskBoardPage
+                  clients={clients}
+                  tasks={tasks}
+                  users={users}
+                  user={user}
+                  onCreateTask={handleCreateTask}
+                  onDeleteTask={handleDeleteTask}
+                  onToggleTaskStatus={(task, status) => handleUpdateTask(task._id, { status })}
+                  onAcceptTaskRequest={(taskId) => handleTaskWorkflowAction(taskId, "accept-request", "Task approved", "The task request was accepted.")}
+                  onRejectTaskRequest={(taskId) => handleTaskWorkflowAction(taskId, "reject-request", "Task rejected", "The task request was rejected.")}
+                  onRequestTaskRejection={(taskId) => handleTaskWorkflowAction(taskId, "request-rejection", "Rejection requested", "The rejection request was sent.")}
+                  onAcceptTaskRejection={(taskId) => handleTaskWorkflowAction(taskId, "accept-rejection", "Task removed", "The task was rejected and removed.")}
+                  onRejectTaskRejection={(taskId) => handleTaskWorkflowAction(taskId, "reject-rejection", "Task kept active", "The task stays active.")}
+                />
+              }
             />
             <Route path="/app/notifications" element={
               <NotificationsPage

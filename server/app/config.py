@@ -18,7 +18,7 @@ class Settings:
     firebase_client_email = getenv("FIREBASE_CLIENT_EMAIL", "")
     firebase_private_key = getenv("FIREBASE_PRIVATE_KEY", "").replace("\\n", "\n")
     gemini_api_key = getenv("GEMINI_API_KEY", "").strip()
-    gemini_model = getenv("GEMINI_MODEL", "gemini-2.0-flash").strip()
+    gemini_model = getenv("GEMINI_MODEL", "gemini-1.5-flash").strip()
     cloudinary_cloud_name = getenv("CLOUDINARY_CLOUD_NAME", "")
     cloudinary_api_key = getenv("CLOUDINARY_API_KEY", "")
     cloudinary_api_secret = getenv("CLOUDINARY_API_SECRET", "")

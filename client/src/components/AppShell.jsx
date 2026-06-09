@@ -1,4 +1,4 @@
-﻿ import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import {
   BellRing,
   BookOpen,
@@ -161,9 +161,20 @@ export default function AppShell({
       <div className="workspace-main">
         <header className="workspace-topbar">
           <div className="topbar-left">
-            <button className="topbar-menu" onClick={() => setDrawerOpen((value) => !value)} type="button" aria-label="Toggle drawer">
-              <Menu size={18} />
-            </button>
+            {/* Menu button with red dot when there are unread notifications */}
+            <div className="topbar-menu-wrap">
+              <button
+                className="topbar-menu"
+                onClick={() => setDrawerOpen((value) => !value)}
+                type="button"
+                aria-label="Toggle drawer"
+              >
+                <Menu size={18} />
+              </button>
+              {notificationsUnreadCount > 0 ? (
+                <span className="badge badge-menu-dot" aria-label="Unread notifications" />
+              ) : null}
+            </div>
             <h1>{activeTitle.label}</h1>
           </div>
 
@@ -209,7 +220,16 @@ export default function AppShell({
             className={({ isActive }) => `mobile-nav-link${isActive ? " active" : ""}`}
             onClick={() => setDrawerOpen(true)}
           >
-            <Icon size={18} />
+            {to === "/app/notifications" ? (
+              <div className="nav-icon-wrap">
+                <Icon size={18} />
+                {notificationsUnreadCount > 0 ? (
+                  <span className="badge badge-nav" aria-label="unread" />
+                ) : null}
+              </div>
+            ) : (
+              <Icon size={18} />
+            )}
             <span>{label.split(" ")[0]}</span>
           </NavLink>
         ))}

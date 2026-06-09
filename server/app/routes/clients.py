@@ -5,22 +5,14 @@ from app.client_imports import enrich_import_rows_with_gemini, normalize_import_
 from app.client_workflow import date_to_utc_datetime, refresh_client_summary, upsert_client_from_payload
 from app.database import (
     get_clients_collection,
-    get_folios_collection,
-    get_holdings_current_collection,
     get_logs_collection,
-    get_mandates_collection,
-    get_sip_registrations_collection,
     get_tasks_collection,
 )
 from app.config import get_settings
 from app.schemas import ClientCreate, ClientUpdate
 from app.utils import (
     map_client,
-    map_folio,
-    map_holding_current,
     map_log,
-    map_mandate,
-    map_sip_registration,
     map_task,
     object_id,
     utc_now,
@@ -35,11 +27,11 @@ def list_clients(
     limit: int = Query(default=50, ge=1, le=200),
     user: dict = Depends(get_current_user),
 ):
-    query = {} if user["role"] == "owner" else {"assignedRmUserId": user["_id"]}
+    # All staff can see all clients — no assignedRmUserId filter
+    query = {}
     if q.strip():
         search = {"$regex": q.strip(), "$options": "i"}
         query = {
-            **query,
             "$or": [
                 {"primaryHolderName": search},
                 {"pan": search},
@@ -142,50 +134,8 @@ def get_client(client_id: str, user: dict = Depends(get_current_user)):
     client = get_clients_collection().find_one({"_id": object_id(client_id)})
     if not client:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Client not found")
-    if user["role"] != "owner" and client.get("assignedRmUserId") != user["_id"]:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to access this client")
+    # All staff can access any client
     return map_client(client)
-
-
-@router.get("/{client_id}/portfolio")
-def get_client_portfolio(client_id: str, user: dict = Depends(get_current_user)):
-    client = get_clients_collection().find_one({"_id": object_id(client_id)})
-    if not client:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Client not found")
-    if user["role"] != "owner" and client.get("assignedRmUserId") != user["_id"]:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to access this client")
-
-    folios = list(get_folios_collection().find({"clientId": client["_id"]}).sort("lastTransactionAt", -1))
-    folio_ids = [folio["_id"] for folio in folios]
-    holdings = list(get_holdings_current_collection().find({"clientId": client["_id"]}).sort("marketValue", -1))
-    sips = list(get_sip_registrations_collection().find({"clientId": client["_id"]}).sort("nextDueAt", 1))
-    mandates = list(get_mandates_collection().find({"clientId": client["_id"]}).sort("updatedAt", -1))
-
-    total_aum = sum(item.get("marketValue", 0) for item in holdings)
-    active_sip_amount = sum(
-        item.get("sipAmount", 0)
-        for item in sips
-        if item.get("status") == "active" and item.get("registrationStatus") == "registered"
-    )
-
-    return {
-        "client": map_client(client),
-        "summary": {
-            "folioCount": len(folios),
-            "schemeCount": len(holdings),
-            "activeSipCount": len([item for item in sips if item.get("status") == "active"]),
-            "mandateCount": len(mandates),
-            "totalAum": round(total_aum, 2),
-            "activeSipAmount": round(active_sip_amount, 2),
-        },
-        "folios": [map_folio(item) for item in folios],
-        "holdings": [map_holding_current(item) for item in holdings],
-        "sips": [map_sip_registration(item) for item in sips],
-        "mandates": [map_mandate(item) for item in mandates],
-        "meta": {
-            "folioIdsTracked": [str(item) for item in folio_ids],
-        },
-    }
 
 
 @router.patch("/{client_id}")
@@ -193,8 +143,7 @@ def update_client(client_id: str, payload: ClientUpdate, user: dict = Depends(ge
     client = get_clients_collection().find_one({"_id": object_id(client_id)})
     if not client:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Client not found")
-    if user["role"] != "owner" and client.get("assignedRmUserId") != user["_id"]:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to update this client")
+    # All staff can update any client
 
     patch = {}
     for key, value in payload.model_dump(exclude_none=True).items():
@@ -224,8 +173,7 @@ def get_client_activity(client_id: str, user: dict = Depends(get_current_user)):
     client = get_clients_collection().find_one({"_id": object_id(client_id)})
     if not client:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Client not found")
-    if user["role"] != "owner" and client.get("assignedRmUserId") != user["_id"]:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to access this client")
+    # All staff can access any client's activity
 
     logs = list(get_logs_collection().find({"clientId": client["_id"]}).sort("createdAt", -1).limit(50))
     tasks = list(get_tasks_collection().find({"clientId": client["_id"]}).sort("createdAt", -1).limit(50))
